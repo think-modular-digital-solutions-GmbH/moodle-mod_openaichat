@@ -41,36 +41,36 @@ class openaichat {
         $modid = $PAGE->cm->instance;
         $userid = $USER->id;
 
-        $rowtermsaccepted = $DB->get_record('openaichat_usertermsofuse', array('modid' => $modid, 'userid' => $userid));
-        if( false !== $rowtermsaccepted && $rowtermsaccepted->termsofuseaccepted > 0 ) {
+        $rowtermsaccepted = $DB->get_record('openaichat_usertermsofuse', ['modid' => $modid, 'userid' => $userid]);
+        if ($rowtermsaccepted !== false && $rowtermsaccepted->termsofuseaccepted > 0) {
             $c = self::get_content();
-            return '<div class="mod_openaichat"><div class="alert alert-warning"><p>'.get_string('disclaimer', 'mod_openaichat').'</p></div><p id="remaining-questions"></p>'.$c->text.$c->footer.'</div>';
+            return '<div class="mod_openaichat"><div class="alert alert-warning"><p>' . get_string('disclaimer', 'mod_openaichat') . '</p></div><p id="remaining-questions"></p>' . $c->text . $c->footer . '</div>';
         } else {
             $form = new termsacceptform();
-            if( $form->is_submitted() ) {
-            $data = $form->get_data();
-            $termsacceptedtime = time();
-            $termsaccepted = isset($data->termsaccept) ? 1 : 0;
-            $redirecturl = isset($data->termsaccept)
-                    ? new moodle_url('/mod/openaichat/view.php', array('id' => $PAGE->cm->id))
-                    : new moodle_url('/course/view.php', array('id' => $PAGE->course->id));
+            if ($form->is_submitted()) {
+                $data = $form->get_data();
+                $termsacceptedtime = time();
+                $termsaccepted = isset($data->termsaccept) ? 1 : 0;
+                $redirecturl = isset($data->termsaccept)
+                        ? new moodle_url('/mod/openaichat/view.php', ['id' => $PAGE->cm->id])
+                        : new moodle_url('/course/view.php', ['id' => $PAGE->course->id]);
 
-            if( $rowtermsaccepted ) {
-                $DB->update_record('openaichat_usertermsofuse', array(
-                'id' => $rowtermsaccepted->id,
-                'termsofuseaccepted' => $termsaccepted,
-                'termsofuseacceptedtime' => $termsacceptedtime
-                ));
-                redirect($redirecturl);
-            } else {
-                $DB->insert_record('openaichat_usertermsofuse', array(
-                'modid' => $modid,
-                'userid' => $userid,
-                'termsofuseaccepted' => $termsaccepted,
-                'termsofuseacceptedtime' => $termsacceptedtime
-                ));
-                redirect($redirecturl);
-            }
+                if ($rowtermsaccepted) {
+                    $DB->update_record('openaichat_usertermsofuse', [
+                        'id' => $rowtermsaccepted->id,
+                        'termsofuseaccepted' => $termsaccepted,
+                        'termsofuseacceptedtime' => $termsacceptedtime,
+                    ]);
+                    redirect($redirecturl);
+                } else {
+                    $DB->insert_record('openaichat_usertermsofuse', [
+                        'modid' => $modid,
+                        'userid' => $userid,
+                        'termsofuseaccepted' => $termsaccepted,
+                        'termsofuseacceptedtime' => $termsacceptedtime,
+                    ]);
+                    redirect($redirecturl);
+                }
             }
             return $form->render();
         }
@@ -80,9 +80,9 @@ class openaichat {
      * This is for site level settings.
      */
     public static function get_type_to_display() {
-        $stored_type = get_config('mod_openaichat', 'type');
-        if ($stored_type) {
-            return $stored_type;
+        $type = get_config('mod_openaichat', 'type');
+        if ($type) {
+            return $type;
         }
 
         return 'chat';
@@ -91,12 +91,12 @@ class openaichat {
     /**
      * Fetch assistants from OpenAI API and return as an array.
      *
-     * @param int|null $block_id The block ID (not used in this function).
+     * @param int|null $blockid The block ID (not used in this function).
      * @param int|null $modid The module instance ID to get specific API key.
      * @return array Associative array of assistant IDs and names.
      */
-    public static function fetch_assistants_array($block_id = null, $modid = null) {
-        if(!empty($modid)) {
+    public static function fetch_assistants_array($blockid = null, $modid = null) {
+        if (!empty($modid)) {
             $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
             $apikey = $instance->apikey;
         } else {
@@ -108,23 +108,23 @@ class openaichat {
         }
 
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $apikey,
-                'Content-Type: application/json'
-            ),
-        ));
+                'Content-Type: application/json',
+            ],
+        ]);
 
         $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
         $response = json_decode($response);
-        $assistant_array = [];
+        $assistants = [];
         if (property_exists($response, 'data') && is_array($response->data)) {
             foreach ($response->data as $assistant) {
-                $assistant_array[$assistant->id] = $assistant->name;
+                $assistants[$assistant->id] = $assistant->name;
             }
         }
 
-        return $assistant_array;
+        return $assistants;
     }
 
     /**
@@ -172,7 +172,7 @@ class openaichat {
                 'gpt-3.5-turbo' => 'chat',
                 'gpt-3.5-turbo-16k' => 'chat',
                 'gpt-3.5-turbo-1106' => 'chat',
-            ]
+            ],
         ];
     }
 
@@ -183,8 +183,7 @@ class openaichat {
      * @param int $userid The user ID.
      * @return bool True if user has questions left, false otherwise.
      */
-    function user_has_questions_left($modid, $userid) {
-
+    public static function user_has_questions_left($modid, $userid) {
         global $DB;
 
         $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
@@ -192,7 +191,7 @@ class openaichat {
             return true;
         }
 
-        $counter = $DB->get_record('openaichat_userlog', array('modid' => $modid, 'userid' => $userid))->questioncounter;
+        $counter = $DB->get_record('openaichat_userlog', ['modid' => $modid, 'userid' => $userid])->questioncounter;
 
         return ($counter < $instance->questionlimit);
     }
@@ -201,10 +200,10 @@ class openaichat {
      * Get the content for the OpenAI chat module.
      */
     private static function get_content() {
-
         global $PAGE, $USER;
 
         $modid = $PAGE->cm->instance;
+        $context = $PAGE->cm->context;
         $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
 
         // Send data to front end.
@@ -220,11 +219,11 @@ class openaichat {
         // First, fetch the global settings for these (and the defaults if not set).
         $assistantname = $instance->assistantname ? $instance->assistantname : get_config('mod_openaichat', 'assistantname');
         $username = $instance->username ? $instance->username : get_config('mod_openaichat', 'username');
-        $assistantname = format_string($assistantname, true, ['context' => $this->context]);
-        $username = format_string($username, true, ['context' => $this->context]);
+        $assistantname = format_string($assistantname, true, ['context' => $context]);
+        $username = format_string($username, true, ['context' => $context]);
 
-        $this->content = new stdClass();
-        $this->content->text = '
+        $content = new stdClass();
+        $content->text = '
             <script>
                 var assistantName = "' . $assistantname . '";
                 var userName = "' . $username . '";
@@ -243,7 +242,7 @@ class openaichat {
             <div id="openai_chat_log" role="log"></div>
         ';
 
-        $this->content->footer = $instance->apikey ? '
+        $content->footer = $instance->apikey ? '
             <div id="control_bar">
                 <div id="input_bar">
                     <textarea id="openai_input" placeholder="' . get_string('askaquestion', 'mod_openaichat') . '" type="text" name="message" rows="4" cols="50"" /></textarea>
@@ -253,6 +252,6 @@ class openaichat {
             </div>'
         : get_string('apikeymissing', 'mod_openaichat');
 
-        return $this->content;
+        return $content;
     }
 }
