@@ -150,8 +150,10 @@ function mod_openaichat_fetch_assistants_array($block_id = null, $modid = null) 
     $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
     $response = json_decode($response);
     $assistant_array = [];
-    foreach ($response->data as $assistant) {
-        $assistant_array[$assistant->id] = $assistant->name;
+    if (property_exists($response, 'data') && is_array($response->data)) {
+        foreach ($response->data as $assistant) {
+            $assistant_array[$assistant->id] = $assistant->name;
+        }
     }
 
     return $assistant_array;
@@ -168,15 +170,15 @@ function get_ai_models() {
             'o3-mini-2025-01-31' => 'o3-mini-2025-01-31',
             'o3-mini' => 'o3-mini',
             'o1-2024-12-17' => 'o1-2024-12-17',
-            'o1' => 'o1',           
+            'o1' => 'o1',
             'gpt-4o-mini-2024-07-18' => 'gpt-4o-mini-2024-07-18',
             'gpt-4o-2024-11-20' => 'gpt-4o-2024-11-20',
-            'gpt-4' => 'gpt-4',           
+            'gpt-4' => 'gpt-4',
             'gpt-4-1106-preview' => 'gpt-4-1106-preview',
             'gpt-4-0613' => 'gpt-4-0613',
             'gpt-3.5-turbo' => 'gpt-3.5-turbo',
             'gpt-3.5-turbo-16k' => 'gpt-3.5-turbo-16k',
-            'gpt-3.5-turbo-1106' => 'gpt-3.5-turbo-1106',            
+            'gpt-3.5-turbo-1106' => 'gpt-3.5-turbo-1106',
 
         ],
         "types" => [
@@ -193,7 +195,7 @@ function get_ai_models() {
             'gpt-4o-2024-11-20' => 'chat',
             'gpt-4' => 'chat',
             'gpt-4-1106-preview' => 'chat',
-            'gpt-4-0613' => 'chat',            
+            'gpt-4-0613' => 'chat',
             'gpt-3.5-turbo' => 'chat',
             'gpt-3.5-turbo-16k' => 'chat',
             'gpt-3.5-turbo-1106' => 'chat',
