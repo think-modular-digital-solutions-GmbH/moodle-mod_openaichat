@@ -28,7 +28,6 @@ require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->dirroot . '/mod/openaichat/lib.php');
 
-
 global $DB, $PAGE;
 
 require_login();
@@ -41,17 +40,19 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $apikey = required_param('apikey', PARAM_TEXT);
 
 if (!$apikey) {
-    print_r([]);
+    http_response_code(400);
+    echo json_encode(['error' => 'API key is required']);
+    exit;
 }
 
 $curl = new \curl();
-$curl->setopt(array(
-    'CURLOPT_HTTPHEADER' => array(
+$curl->setopt([
+    'CURLOPT_HTTPHEADER' => [
         'Authorization: Bearer ' . $apikey,
         'Content-Type: application/json',
-        'OpenAI-Beta: assistants=v2'
-    ),
-));
+        'OpenAI-Beta: assistants=v2',
+    ],
+]);
 
 $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
 

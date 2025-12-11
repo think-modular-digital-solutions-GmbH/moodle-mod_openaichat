@@ -20,7 +20,7 @@
  * @package    mod_openaichat
  * @copyright  2024 think modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
@@ -39,8 +39,8 @@ global $DB;
 
 $modid = required_param('modId', PARAM_INT);
 $userid = required_param('userId', PARAM_TEXT);
-
-$questionlimit = get_mod_config($modid, 'questionlimit');
+$instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+$questionlimit = $instance->questionlimit;
 
 $counter = $DB->get_record('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id])->questioncounter;
 
@@ -48,7 +48,6 @@ if ($questionlimit == 0) {
     echo "-1";
 } else {
     if ($counter < $questionlimit) {
-        //remaining questions
         echo $questionlimit - $counter;
     } else {
         echo "false";

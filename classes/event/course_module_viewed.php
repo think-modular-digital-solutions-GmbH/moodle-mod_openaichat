@@ -37,7 +37,6 @@ global $CFG;
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 class course_module_viewed extends \core\event\course_module_viewed {
-
     /**
      * Init method.
      */
@@ -51,6 +50,24 @@ class course_module_viewed extends \core\event\course_module_viewed {
      * Get objectid mapping
      */
     public static function get_objectid_mapping() {
-        return array('db' => 'openaichat', 'restore' => 'openaichat');
+        return ['db' => 'openaichat', 'restore' => 'openaichat'];
+    }
+
+    /**
+     * Returns description of what happened.
+     *
+     * @return string
+     */
+    public function get_description() {
+        return "The user with id '$this->userid' viewed the openaichat module instance with id '$this->objectid' ";
+    }
+
+    /**
+     * Return localised event name.
+     *
+     * @return string
+     */
+    public static function get_name() {
+        return get_string('event:modviewed', 'mod_openaichat');
     }
 }

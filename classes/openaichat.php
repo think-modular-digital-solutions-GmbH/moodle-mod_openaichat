@@ -1,0 +1,258 @@
+<?php
+// This file is part of Moodle - http://moodle.org/
+//
+// Moodle is free software: you can redistribute it and/or modify
+// it under the terms of the GNU General Public License as published by
+// the Free Software Foundation, either version 3 of the License, or
+// (at your option) any later version.
+//
+// Moodle is distributed in the hope that it will be useful,
+// but WITHOUT ANY WARRANTY; without even the implied warranty of
+// MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+// GNU General Public License for more details.
+//
+// You should have received a copy of the GNU General Public License
+// along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
+
+/**
+ * Module class
+ *
+ * @package    mod_openaichat
+ * @copyright  2024 think modular
+ * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
+ */
+
+namespace mod_openaichat;
+
+use mod_openaichat\form\termsacceptform;
+
+/**
+ * Module class
+ *
+ * @package    openaichat
+ */
+class openaichat {
+    /**
+     * Render the OpenAI chat module.
+     */
+    public static function render() {
+        global $PAGE, $USER, $DB;
+
+        $modid = $PAGE->cm->instance;
+        $userid = $USER->id;
+
+        $rowtermsaccepted = $DB->get_record('openaichat_usertermsofuse', array('modid' => $modid, 'userid' => $userid));
+        if( false !== $rowtermsaccepted && $rowtermsaccepted->termsofuseaccepted > 0 ) {
+            $c = self::get_content();
+            return '<div class="mod_openaichat"><div class="alert alert-warning"><p>'.get_string('disclaimer', 'mod_openaichat').'</p></div><p id="remaining-questions"></p>'.$c->text.$c->footer.'</div>';
+        } else {
+            $form = new termsacceptform();
+            if( $form->is_submitted() ) {
+            $data = $form->get_data();
+            $termsacceptedtime = time();
+            $termsaccepted = isset($data->termsaccept) ? 1 : 0;
+            $redirecturl = isset($data->termsaccept)
+                    ? new moodle_url('/mod/openaichat/view.php', array('id' => $PAGE->cm->id))
+                    : new moodle_url('/course/view.php', array('id' => $PAGE->course->id));
+
+            if( $rowtermsaccepted ) {
+                $DB->update_record('openaichat_usertermsofuse', array(
+                'id' => $rowtermsaccepted->id,
+                'termsofuseaccepted' => $termsaccepted,
+                'termsofuseacceptedtime' => $termsacceptedtime
+                ));
+                redirect($redirecturl);
+            } else {
+                $DB->insert_record('openaichat_usertermsofuse', array(
+                'modid' => $modid,
+                'userid' => $userid,
+                'termsofuseaccepted' => $termsaccepted,
+                'termsofuseacceptedtime' => $termsacceptedtime
+                ));
+                redirect($redirecturl);
+            }
+            }
+            return $form->render();
+        }
+    }
+
+    /**
+     * This is for site level settings.
+     */
+    public static function get_type_to_display() {
+        $stored_type = get_config('mod_openaichat', 'type');
+        if ($stored_type) {
+            return $stored_type;
+        }
+
+        return 'chat';
+    }
+
+    /**
+     * Fetch assistants from OpenAI API and return as an array.
+     *
+     * @param int|null $block_id The block ID (not used in this function).
+     * @param int|null $modid The module instance ID to get specific API key.
+     * @return array Associative array of assistant IDs and names.
+     */
+    public static function fetch_assistants_array($block_id = null, $modid = null) {
+        if(!empty($modid)) {
+            $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+            $apikey = $instance->apikey;
+        } else {
+            $apikey = get_config('mod_openaichat', 'apikey');
+        }
+
+        if (!$apikey) {
+            return [];
+        }
+
+        $curl = new \curl();
+        $curl->setopt(array(
+            'CURLOPT_HTTPHEADER' => array(
+                'Authorization: Bearer ' . $apikey,
+                'Content-Type: application/json'
+            ),
+        ));
+
+        $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
+        $response = json_decode($response);
+        $assistant_array = [];
+        if (property_exists($response, 'data') && is_array($response->data)) {
+            foreach ($response->data as $assistant) {
+                $assistant_array[$assistant->id] = $assistant->name;
+            }
+        }
+
+        return $assistant_array;
+    }
+
+    /**
+     * Get available AI models and their types.
+     *
+     * @return array Associative array containing models and their types.
+     */
+    public static function get_ai_models() {
+        return [
+            "models" => [
+                'gpt-4.1' => 'gpt-4.1',
+                'gpt-4.1-mini' => 'gpt-4.1-mini',
+                'gpt-4.1-nano' => 'gpt-4.1-nano',
+                'gpt-4o' => 'gpt-4o',
+                'gpt-4o-mini' => 'gpt-4o-mini',
+                'o3-mini-2025-01-31' => 'o3-mini-2025-01-31',
+                'o3-mini' => 'o3-mini',
+                'o1-2024-12-17' => 'o1-2024-12-17',
+                'o1' => 'o1',
+                'gpt-4o-mini-2024-07-18' => 'gpt-4o-mini-2024-07-18',
+                'gpt-4o-2024-11-20' => 'gpt-4o-2024-11-20',
+                'gpt-4' => 'gpt-4',
+                'gpt-4-1106-preview' => 'gpt-4-1106-preview',
+                'gpt-4-0613' => 'gpt-4-0613',
+                'gpt-3.5-turbo' => 'gpt-3.5-turbo',
+                'gpt-3.5-turbo-16k' => 'gpt-3.5-turbo-16k',
+                'gpt-3.5-turbo-1106' => 'gpt-3.5-turbo-1106',
+
+            ],
+            "types" => [
+                'gpt-4.1' => 'chat',
+                'gpt-4.1-mini' => 'chat',
+                'gpt-4.1-nano' => 'chat',
+                'gpt-4o' => 'chat',
+                'gpt-4o-mini' => 'chat',
+                'o3-mini-2025-01-31' => 'chat',
+                'o3-mini' => 'chat',
+                'o1-2024-12-17' => 'chat',
+                'o1' => 'chat',
+                'gpt-4o-mini-2024-07-18' => 'chat',
+                'gpt-4o-2024-11-20' => 'chat',
+                'gpt-4' => 'chat',
+                'gpt-4-1106-preview' => 'chat',
+                'gpt-4-0613' => 'chat',
+                'gpt-3.5-turbo' => 'chat',
+                'gpt-3.5-turbo-16k' => 'chat',
+                'gpt-3.5-turbo-1106' => 'chat',
+            ]
+        ];
+    }
+
+    /**
+     * Check if user has questions left based on question limit.
+     *
+     * @param int $modid The module instance ID.
+     * @param int $userid The user ID.
+     * @return bool True if user has questions left, false otherwise.
+     */
+    function user_has_questions_left($modid, $userid) {
+
+        global $DB;
+
+        $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+        if ($instance->questionlimit == 0) {
+            return true;
+        }
+
+        $counter = $DB->get_record('openaichat_userlog', array('modid' => $modid, 'userid' => $userid))->questioncounter;
+
+        return ($counter < $instance->questionlimit);
+    }
+
+    /**
+     * Get the content for the OpenAI chat module.
+     */
+    private static function get_content() {
+
+        global $PAGE, $USER;
+
+        $modid = $PAGE->cm->instance;
+        $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+
+        // Send data to front end.
+        $persistconvo = $instance->persistconvo;
+
+        $PAGE->requires->js_call_amd('mod_openaichat/lib', 'init', [[
+            'modId' => $modid,
+            'api_type' => $instance->type,
+            'persistConvo' => $persistconvo,
+            'userId' => $USER->id,
+        ]]);
+
+        // First, fetch the global settings for these (and the defaults if not set).
+        $assistantname = $instance->assistantname ? $instance->assistantname : get_config('mod_openaichat', 'assistantname');
+        $username = $instance->username ? $instance->username : get_config('mod_openaichat', 'username');
+        $assistantname = format_string($assistantname, true, ['context' => $this->context]);
+        $username = format_string($username, true, ['context' => $this->context]);
+
+        $this->content = new stdClass();
+        $this->content->text = '
+            <script>
+                var assistantName = "' . $assistantname . '";
+                var userName = "' . $username . '";
+            </script>
+
+            <style>
+                ' . $showlabelscss . '
+                .openai_message.user:before {
+                    content: "' . $username . '";
+                }
+                .openai_message.bot:before {
+                    content: "' . $assistantname . '";
+                }
+            </style>
+
+            <div id="openai_chat_log" role="log"></div>
+        ';
+
+        $this->content->footer = $instance->apikey ? '
+            <div id="control_bar">
+                <div id="input_bar">
+                    <textarea id="openai_input" placeholder="' . get_string('askaquestion', 'mod_openaichat') . '" type="text" name="message" rows="4" cols="50"" /></textarea>
+                    <button title="Submit" id="go"><i class="fa fa-arrow-right"></i></button>
+                </div>
+                <button title="New chat" id="refresh"><i class="fa fa-refresh"></i></button>
+            </div>'
+        : get_string('apikeymissing', 'mod_openaichat');
+
+        return $this->content;
+    }
+}

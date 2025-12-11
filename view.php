@@ -22,49 +22,48 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-require(__DIR__.'/../../config.php');
-require_once(__DIR__.'/lib.php');
-require_once(__DIR__.'/mod_openaichat.php');
+require(__DIR__ . '/../../config.php');
+require_once(__DIR__ . '/lib.php');
+require_once(__DIR__ . '/mod_openaichat.php');
 
+use context_module;
+use mod_openaichat\openaichat;
 
-// Course module id.
+// Get the parameters.
 $id = optional_param('id', 0, PARAM_INT);
-
-// Activity instance id.
-$o = optional_param('o', 0, PARAM_INT);
-
+$instanceid = optional_param('o', 0, PARAM_INT);
 
 if ($id) {
     $cm = get_coursemodule_from_id('openaichat', $id, 0, false, MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $cm->course), '*', MUST_EXIST);
-    $moduleinstance = $DB->get_record('openaichat', array('id' => $cm->instance), '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $cm->course], '*', MUST_EXIST);
+    $moduleinstance = $DB->get_record('openaichat', ['id' => $cm->instance], '*', MUST_EXIST);
 } else {
-    $moduleinstance = $DB->get_record('openaichat', array('id' => $o), '*', MUST_EXIST);
-    $course = $DB->get_record('course', array('id' => $moduleinstance->course), '*', MUST_EXIST);
+    $moduleinstance = $DB->get_record('openaichat', ['id' => $instanceid], '*', MUST_EXIST);
+    $course = $DB->get_record('course', ['id' => $moduleinstance->course], '*', MUST_EXIST);
     $cm = get_coursemodule_from_instance('openaichat', $moduleinstance->id, $course->id, false, MUST_EXIST);
 }
 
+// Permissions.
 require_login($course, true, $cm);
-
-$openai = new mod_openaichat();
-
 $modulecontext = context_module::instance($cm->id);
+require_capability('mod/openaichat:view', $modulecontext);
 
-$event = \mod_openaichat\event\course_module_viewed::create(array(
-    'objectid' => $moduleinstance->id,
-    'context' => $modulecontext
-));
-$event->add_record_snapshot('course', $course);
-$event->add_record_snapshot('openaichat', $moduleinstance);
-$event->trigger();
-
-$PAGE->set_url('/mod/openaichat/view.php', array('id' => $cm->id));
+// Set up the page.
+$PAGE->set_url('/mod/openaichat/view.php', ['id' => $cm->id]);
 $PAGE->set_title(format_string($moduleinstance->name));
 $PAGE->set_heading(format_string($course->fullname));
 $PAGE->set_context($modulecontext);
 
-$rendered = $openai->render();
+// Create event.
+$event = \mod_openaichat\event\course_module_viewed::create([
+    'objectid' => $moduleinstance->id,
+    'context' => $modulecontext,
+]);
+$event->add_record_snapshot('course', $course);
+$event->add_record_snapshot('openaichat', $moduleinstance);
+$event->trigger();
 
+// Output the page.
 echo $OUTPUT->header();
-echo $rendered;
+echo openaichat::render();
 echo $OUTPUT->footer();

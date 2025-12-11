@@ -80,22 +80,18 @@
     animation: none;
     opacity: 0;
 }
-
 .mod_openaichat.disabled,
 .mod_openaichat .disabled {
     opacity: 0.25;
     pointer-events: none;
 }
-
 #report-link {
     font-size: 15px;
     padding-left: 25px;
 }
-
 #remaining-questions {
     text-align: center;
 }
-
 @keyframes mod_openaichat_popup {
     0% {
         opacity: 0;
@@ -112,7 +108,6 @@
         transform: translateY(0);
     }
 }
-
 @keyframes mod_openaichat_thinking {
     0% {
         opacity: 1;
@@ -124,7 +119,6 @@
         opacity: 1;
     }
 }
-
 @keyframes mod_openaichat_fade-in {
     from {
         opacity: 0;

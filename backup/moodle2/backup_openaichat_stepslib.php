@@ -15,6 +15,8 @@
 // along with Moodle.  If not, see <http://www.gnu.org/licenses/>.
 
 /**
+ * Backup steps for the openaichat activity module
+ *
  * @package    mod_openaichat
  * @subpackage backup-moodle2
  * @copyright  2024 think modular h.khayami@think-modular.com
@@ -29,18 +31,41 @@
  * Define the complete openaichat structure for backup, with file and id annotations
  */
 class backup_openaichat_activity_structure_step extends backup_activity_structure_step {
-
+    /**
+     * Define the structure
+     */
     protected function define_structure() {
-
-        // To know if we are including userinfo
+        // To know if we are including userinfo.
         $userinfo = $this->get_setting_value('userinfo');
 
-        // Define each element separated
-        $openaichat = new backup_nested_element('openaichat', array('id'), array(
-            'name', 'timecreated', 'timemodified', 'intro', 'introformat', 'apikey',
-            'type', 'assistantname', 'username', 'restrictusage', 'assistant',
-            'persistconvo', 'prompt', 'sourceoftruth', 'model', 'temperature', 'maxlength',
-            'topp', 'frequency', 'presence', 'questionlimit'));
+        // Define each element separated.
+        $openaichat = new backup_nested_element(
+            'openaichat',
+            ['id'],
+            [
+                'name',
+                'timecreated',
+                'timemodified',
+                'intro',
+                'introformat',
+                'apikey',
+                'type',
+                'assistantname',
+                'username',
+                'restrictusage',
+                'assistant',
+                'persistconvo',
+                'prompt',
+                'sourceoftruth',
+                'model',
+                'temperature',
+                'maxlength',
+                'topp',
+                'frequency',
+                'presence',
+                'questionlimit',
+            ]
+        );
 
         // Define sources.
         $openaichat->set_source_table('openaichat', ['id' => backup::VAR_ACTIVITYID]);

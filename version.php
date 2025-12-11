@@ -25,7 +25,8 @@
 defined('MOODLE_INTERNAL') || die();
 
 $plugin->component = 'mod_openaichat';
-$plugin->release = '0.1.2';
-$plugin->version = 2025050201;
+$plugin->maturity = MATURITY_STABLE;
 $plugin->requires = 2022041900;
-$plugin->maturity = MATURITY_ALPHA;
+$plugin->supports = [401, 405];
+$plugin->version = 2025121101;
+$plugin->release = '1.0.0';

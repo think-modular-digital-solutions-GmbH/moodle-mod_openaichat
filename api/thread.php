@@ -31,41 +31,39 @@ if (get_config('mod_openai_chat', 'restrictusage') !== "0") {
     require_login();
 }
 
-//global $PAGE;
+global $DB;
 
 $modid = required_param('modId', PARAM_INT);
-$thread_id = required_param('thread_id', PARAM_NOTAGS);
-//$apikey = get_config('mod_openaichat', 'apikey');
-$apikey = get_mod_config($modid, "apikey");
-
-
+$threadid = required_param('threadid', PARAM_NOTAGS);
+$instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+$apikey = $instance->apikey;
 
 $curl = new \curl();
-$curl->setopt(array(
-    'CURLOPT_HTTPHEADER' => array(
+$curl->setopt([
+    'CURLOPT_HTTPHEADER' => [
         'Authorization: Bearer ' . $apikey,
         'Content-Type: application/json',
-        'OpenAI-Beta: assistants=v2'
-    ),
-));
+        'OpenAI-Beta: assistants=v2',
+    ],
+]);
 
-$response = $curl->get("https://api.openai.com/v1/threads/$thread_id/messages");
+$response = $curl->get("https://api.openai.com/v1/threads/$threadid/messages");
 $response = json_decode($response);
 
 if (property_exists($response, 'error')) {
     throw new \Exception($response->error->message);
 }
 
-$api_response = [];
-$message_list = array_reverse($response->data);
+$apiresponse = [];
+$messages = array_reverse($response->data);
 
-foreach ($message_list as $message) {
-    array_push($api_response, [
+foreach ($messages as $message) {
+    array_push($apiresponse, [
         "id" => $message->id,
         "role" => $message->role,
-        "message" => $message->content[0]->text->value
+        "message" => $message->content[0]->text->value,
     ]);
 }
 
-$api_response = json_encode($api_response);
-echo $api_response;
+$apiresponse = json_encode($apiresponse);
+echo $apiresponse;

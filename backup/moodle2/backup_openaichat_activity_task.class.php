@@ -31,7 +31,6 @@ require_once($CFG->dirroot . '/mod/openaichat/backup/moodle2/backup_openaichat_s
  * Provides the steps to perform one complete backup of the OPENAICHAT instance
  */
 class backup_openaichat_activity_task extends backup_activity_task {
-
     /**
      * No specific settings for this activity
      */
@@ -51,18 +50,18 @@ class backup_openaichat_activity_task extends backup_activity_task {
      * @param string $content some HTML text that eventually contains URLs to the activity instance scripts
      * @return string the content with the URLs encoded
      */
-    static public function encode_content_links($content) {
+    public static function encode_content_links($content) {
         global $CFG;
 
         $base = preg_quote($CFG->wwwroot, "/");
 
-        // Link to the list of openaichats
-        $search="/(".$base."\/mod\/openaichat\/index.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@OPENAICHATINDEX*$2@$', $content);
+        // Link to the list of openaichats.
+        $search = "/(" . $base . "\/mod\/openaichat\/index.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@OPENAICHATINDEX*$2@$', $content);
 
-        // Link to openaichat view by moduleid
-        $search="/(".$base."\/mod\/openaichat\/view.php\?id\=)([0-9]+)/";
-        $content= preg_replace($search, '$@OPENAICHATVIEWBYID*$2@$', $content);
+        // Link to openaichat view by moduleid.
+        $search = "/(" . $base . "\/mod\/openaichat\/view.php\?id\=)([0-9]+)/";
+        $content = preg_replace($search, '$@OPENAICHATVIEWBYID*$2@$', $content);
 
         return $content;
     }

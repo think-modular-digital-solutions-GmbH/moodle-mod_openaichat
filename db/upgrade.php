@@ -22,8 +22,6 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
-
 /**
  * Execute mod_openaichat upgrade from the given old version.
  *
@@ -36,7 +34,6 @@ function xmldb_openaichat_upgrade($oldversion) {
     $dbman = $DB->get_manager();
 
     if ($oldversion < 2024022200) {
-
         // Define field questionlimit to be added to openaichat.
         $table = new xmldb_table('openaichat');
         $field = new xmldb_field('questionlimit', XMLDB_TYPE_INTEGER, '5', null, null, null, null, 'presence');
@@ -53,17 +50,17 @@ function xmldb_openaichat_upgrade($oldversion) {
     if ($oldversion < 2024051701) {
         // Add openaichat_usertermsofuse table.
         $table = new xmldb_table('openaichat_usertermsofuse');
-	$table->setComment('Stores per course module if user has accepted terms of use');
+        $table->setComment('Stores per course module if user has accepted terms of use');
 
         // Adding fields.
         $table->add_field('id', XMLDB_TYPE_INTEGER, '10', null, XMLDB_NOTNULL, XMLDB_SEQUENCE, null);
         $table->add_field('modid', XMLDB_TYPE_INTEGER, '15', null, XMLDB_NOTNULL, null, null);
         $table->add_field('userid', XMLDB_TYPE_INTEGER, '20', null, XMLDB_NOTNULL, null, null);
-	$table->add_field('termsofuseaccepted', XMLDB_TYPE_INTEGER, '1', XMLDB_NOTNULL, null, 0);
+        $table->add_field('termsofuseaccepted', XMLDB_TYPE_INTEGER, '1', XMLDB_NOTNULL, null, 0);
         $table->add_field('termsofuseacceptedtime', XMLDB_TYPE_INTEGER, '10', null, null);
 
         // Adding keys to table assign_overrides.
-        $table->add_key('primary', XMLDB_KEY_PRIMARY, array('id'));
+        $table->add_key('primary', XMLDB_KEY_PRIMARY, ['id']);
 
         // Create table.
         if (!$dbman->table_exists($table)) {
@@ -73,7 +70,6 @@ function xmldb_openaichat_upgrade($oldversion) {
     }
 
     if ($oldversion < 2024091901) {
-
         // Changing precision of field apikey on table openaichat to (255).
         $table = new xmldb_table('openaichat');
         $field = new xmldb_field('apikey', XMLDB_TYPE_CHAR, '255', null, null, null, null, 'introformat');

@@ -20,7 +20,7 @@
  * @package    mod_openaichat
  * @copyright  2024 think modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
@@ -50,14 +50,13 @@ $logdata = [
 ];
 
 if (!empty($modid) && !empty($requestmessage) && !empty($responsemessage) && !empty($sesskey)) {
-
     $DB->insert_record('openaichat_chatlog', $logdata);
 
-    if(!$DB->record_exists('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id])) {
+    if (!$DB->record_exists('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id])) {
         $DB->insert_record('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id, 'questioncounter' => 1]);
     } else {
         $record = $DB->get_record('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id]);
         $record->questioncounter += 1;
-        $DB->update_record('openaichat_userlog',$record);
+        $DB->update_record('openaichat_userlog', $record);
     }
 }

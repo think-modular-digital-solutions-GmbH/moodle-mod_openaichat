@@ -24,15 +24,26 @@
 
 defined('MOODLE_INTERNAL') || die();
 
-require_once($CFG->dirroot .'/mod/openaichat/lib.php');
-$type = mod_openaichat_get_type_to_display();
-$assistant_array = mod_openaichat_fetch_assistants_array();
+use mod_openaichat\openaichat;
+
+require_once($CFG->dirroot . '/mod/openaichat/lib.php');
+
+$type = openaichat::get_type_to_display();
+$assistantarray = openaichat::fetch_assistants_array();
 
 global $PAGE, $ADMIN;
 
 $PAGE->requires->js_call_amd('mod_openaichat/settings', 'init');
 
-$ADMIN->add('reports', new admin_externalpage('mod_openaichat_reportlog', get_string('openailog', 'mod_openaichat'), "$CFG->wwwroot/mod/openaichat/report.php", 'report/log:view'));
+$ADMIN->add(
+    'reports',
+    new admin_externalpage(
+        'mod_openaichat_reportlog',
+        get_string('openailog', 'mod_openaichat'),
+        "$CFG->wwwroot/mod/openaichat/report.php",
+        'report/log:view'
+    )
+);
 
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/apikey',
@@ -81,8 +92,7 @@ $settings->add(new \admin_setting_configtext(
     PARAM_TEXT
 ));
 
-// Assistant settings //
-
+// Assistant settings.
 if ($type === 'assistant') {
     $settings->add(new \admin_setting_heading(
         'mod_openaichat/assistantheading',
@@ -90,13 +100,13 @@ if ($type === 'assistant') {
         get_string('assistantheadingdesc', 'mod_openaichat')
     ));
 
-    if (count($assistant_array)) {
+    if (count($assistantarray)) {
         $settings->add(new \admin_setting_configselect(
             'mod_openaichat/assistant',
             get_string('assistant', 'mod_openaichat'),
             get_string('assistantdesc', 'mod_openaichat'),
-            count($assistant_array) ? reset($assistant_array) : null,
-            $assistant_array
+            count($assistantarray) ? reset($assistantarray) : null,
+            $assistantarray,
         ));
     } else {
         $settings->add(new \admin_setting_description(
@@ -112,11 +122,8 @@ if ($type === 'assistant') {
         get_string('persistconvodesc', 'mod_openaichat'),
         1
     ));
-
 } else {
-
-    // Chat settings //
-
+    // Chat settings.
     $settings->add(new \admin_setting_heading(
         'mod_openaichat/chatheading',
         get_string('chatheading', 'mod_openaichat'),
@@ -140,9 +147,7 @@ if ($type === 'assistant') {
     ));
 }
 
-
-// Advanced Settings //
-
+// Advanced Settings.
 $settings->add(new \admin_setting_heading(
     'mod_openaichat/advanced',
     get_string('advanced', 'mod_openaichat'),
@@ -156,15 +161,13 @@ $settings->add(new \admin_setting_configcheckbox(
     0
 ));
 
-if ($type === 'assistant') {
-
-} else {
+if ($type !== 'assistant') {
     $settings->add(new \admin_setting_configselect(
         'mod_openaichat/model',
         get_string('model', 'mod_openaichat'),
         get_string('modeldesc', 'mod_openaichat'),
         'text-davinci-003',
-        get_ai_models()['models']
+        openaichat::get_ai_models()['models']
     ));
 
     $settings->add(new \admin_setting_configtext(

@@ -23,35 +23,39 @@
  */
 
 namespace mod_openaichat\completion;
-//namespace block_openai_chat\completion;
-//use block_openai_chat\completion;
-defined('MOODLE_INTERNAL') || die;
 
+/**
+ * Class providing completions for chat models (3.5 and up)
+ *
+ * @package    mod_openaichat
+ */
 class chat extends \mod_openaichat\completion {
-
-    public function __construct($model, $message, $history, $mod_settings, $thread_id = null) {
-        parent::__construct($model, $message, $history, $mod_settings);
+    /**
+     * Constructor
+     */
+    public function __construct($model, $message, $history, $modsettings, $threadid = null) {
+        parent::__construct($model, $message, $history, $modsettings);
     }
 
     /**
-     * Given everything we know after constructing the parent, create a completion by constructing the prompt and making the api call
+     * Given everything we know after constructing the parent,
+     * create a completion by constructing the prompt and making the api call
      * @return JSON: The API response from OpenAI
      */
     public function create_completion($context) {
-
         if ($this->sourceoftruth) {
             $this->sourceoftruth = format_string($this->sourceoftruth, true, ['context' => $context]);
             $this->prompt .= get_string('sourceoftruthreinforcement', 'mod_openaichat');
         }
         $this->prompt .= "\n\n";
 
-        $history_json = $this->format_history();
-        array_unshift($history_json, ["role" => "system", "content" => $this->prompt]);
-        array_unshift($history_json, ["role" => "system", "content" => $this->sourceoftruth]);
+        $historyjson = $this->format_history();
+        array_unshift($historyjson, ["role" => "system", "content" => $this->prompt]);
+        array_unshift($historyjson, ["role" => "system", "content" => $this->sourceoftruth]);
 
-        array_push($history_json, ["role" => "user", "content" => $this->message]);
+        array_push($historyjson, ["role" => "user", "content" => $this->message]);
 
-        return $this->make_api_call($history_json);
+        return $this->make_api_call($historyjson);
     }
 
     /**
@@ -72,7 +76,6 @@ class chat extends \mod_openaichat\completion {
      * @return JSON: The response from OpenAI
      */
     private function make_api_call($history) {
-
         $curlbody = [
             "model" => $this->model,
             "messages" => $history,
@@ -81,38 +84,31 @@ class chat extends \mod_openaichat\completion {
             "top_p" => (float) $this->topp,
             "frequency_penalty" => (float) $this->frequency,
             "presence_penalty" => (float) $this->presence,
-            "stop" => $this->username . ":"
+            "stop" => $this->username . ":",
         ];
 
         if (str_starts_with($this->model, "o")) {
             $curlbody = [
                 "model" => $this->model,
                 "messages" => $history,
-                "max_completion_tokens" => (int) $this->maxlength
+                "max_completion_tokens" => (int) $this->maxlength,
             ];
         }
 
-
-        // echo json_encode($curlbody);exit;
-        //echo json_encode(["message"=>$this->model]);exit;
-
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
-                'Content-Type: application/json'
-            ),
-        ));
-
+                'Content-Type: application/json',
+            ],
+        ]);
 
         $response = $curl->post("https://api.openai.com/v1/chat/completions", json_encode($curlbody));
         $response = json_decode($response);
 
-        //echo json_encode(["message"=>$history[4]["content"]]);exit;
-
         return [
             "id" => $response->id,
-            "message" => $response->choices[0]->message->content
+            "message" => $response->choices[0]->message->content,
         ];
     }
 }

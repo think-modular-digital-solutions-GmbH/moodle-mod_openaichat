@@ -20,7 +20,7 @@
  * @package    mod_openaichat
  * @copyright  2024 think modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 require_once('../../config.php');
 require_once($CFG->libdir . '/filelib.php');
@@ -49,20 +49,32 @@ require_login();
 
 global $DB;
 
-if(empty($modid)) {
-    $data_arr = $DB->get_records('openaichat_chatlog');
+if (empty($modid)) {
+    $records = $DB->get_records('openaichat_chatlog');
 } else {
-    $data_arr = $DB->get_records('openaichat_chatlog', ['modid' => $modid]);
+    $records = $DB->get_records('openaichat_chatlog', ['modid' => $modid]);
 }
 
 echo $OUTPUT->header();
 $table = new html_table();
-$table->head = array('order', 'Session id', 'Activity', 'Questions', 'Answers');
+$table->head = [
+    'order',
+    'Session id',
+    'Activity',
+    'Questions',
+    'Answers',
+];
 $order = 1;
-foreach($data_arr as $record) {
+foreach ($records as $record) {
     $activityname = $DB->get_record('openaichat', ['id' => $record->modid])->name;
     $activityurl = '<a href="' . $CFG->wwwroot . '/mod/openaichat/view.php?id=' . $cmid . '">' . $activityname . '</a>';
-    $table->data[] = array($order, $record->sesskey, $activityurl, $record->request, $record->response);
+    $table->data[] = [
+        $order,
+        $record->sesskey,
+        $activityurl,
+        $record->request,
+        $record->response,
+    ];
     $order += 1;
 }
 echo html_writer::table($table);

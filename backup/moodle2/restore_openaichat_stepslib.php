@@ -22,19 +22,16 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die;
-
 /**
  * Structure step to restore one openaichat activity
  */
 class restore_openaichat_activity_structure_step extends restore_activity_structure_step {
-
+    /**
+     * Define the structure
+     */
     protected function define_structure() {
-        $paths = array();
-
+        $paths = [];
         $paths[] = new restore_path_element('openaichat', '/activity/openaichat');
-
-        // Return the paths wrapped into standard activity structure
         return $this->prepare_activity_structure($paths);
     }
 
@@ -54,10 +51,5 @@ class restore_openaichat_activity_structure_step extends restore_activity_struct
 
         $newitemid = $DB->insert_record('openaichat', $data);
         $this->apply_activity_instance($newitemid);
-    }
-
-    protected function after_execute() {
-        // Add openaichat related files, no need to match by itemname (just internally handled context)
-        //$this->add_related_files('mod_openaichat', 'intro', null);
     }
 }

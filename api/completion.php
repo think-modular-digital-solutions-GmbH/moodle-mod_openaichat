@@ -24,6 +24,8 @@
 
 namespace mod_openaichat;
 
+use mod_openaichat\openaichat;
+
 require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->dirroot . '/mod/openaichat/lib.php');
@@ -32,10 +34,12 @@ require_once($CFG->dirroot . '/mod/openaichat/classes/completion/chat.php');
 
 global $DB, $PAGE;
 
+// Enforce login if usage is restricted.
 if (get_config('mod_openaichat', 'restrictusage') !== "0") {
     require_login();
 }
 
+// Only allow POST requests.
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     header("Location: $CFG->wwwroot");
     die();
@@ -44,14 +48,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $body = json_decode(file_get_contents('php://input'), true);
 $message = clean_param($body['message'], PARAM_NOTAGS);
 $history = clean_param_array($body['history'], PARAM_NOTAGS, true);
-$modId = clean_param($body['modId'], PARAM_INT, true);
-$thread_id = clean_param($body['threadId'], PARAM_NOTAGS, true);
+$modid = clean_param($body['modId'], PARAM_INT, true);
+$threadid = clean_param($body['threadId'], PARAM_NOTAGS, true);
+$instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
 
-$mod_settings = get_mod_config($modId); //object
-$mod_settings_array = [];
-
-
-$setting_names = [
+// Fetch module settings.
+$modsettings = [];
+$settings = [
     'sourceoftruth',
     'prompt',
     'username',
@@ -63,35 +66,34 @@ $setting_names = [
     'topp',
     'frequency',
     'presence',
-    'assistant'
+    'assistant',
 ];
-
-foreach($setting_names as $setting){
-    if($mod_settings && property_exists($mod_settings, $setting)) {
-        $mod_settings_array[$setting] = $mod_settings->$setting;
+foreach ($settings as $setting) {
+    if ($instance && property_exists($instance, $setting)) {
+        $modsettings[$setting] = $instance->$setting;
     } else {
-        $mod_settings_array[$setting] = "";
+        $modsettings[$setting] = "";
     }
 }
 
-$mod_settings_array['modid'] = $modId;
-$engine_class;
-$model = $mod_settings->model;
-$api_type = $mod_settings->type;
+$modsettings['modid'] = $modid;
+$engineclass;
+$model = $instance->model;
+$apitype = $instance->type;
 
-if ($api_type === 'assistant') {
-    $engine_class = '\mod_openaichat\completion\assistant';
+if ($apitype === 'assistant') {
+    $engineclass = '\mod_openaichat\completion\assistant';
 } else {
-    $engines = get_ai_models()['types'];
+    $engines = openaichat::get_ai_models()['types'];
     if (get_config('mod_openaichat', 'allowinstancesettings') === "1" && $model) {
         $model = $model;
     }
     if (!$model) {
         $model = 'gpt-3.5-turbo';
     }
-    $engine_class = '\mod_openaichat\completion\\' . $engines[$model];
+    $engineclass = '\mod_openaichat\completion\\' . $engines[$model];
 }
-$completion = new $engine_class(...[$model, $message, $history, $mod_settings_array, $thread_id]);
+$completion = new $engineclass(...[$model, $message, $history, $modsettings, $threadid]);
 $response = $completion->create_completion($PAGE->context);
 
 $response["message"] = format_text($response["message"], FORMAT_MARKDOWN, ['context' => $context]);

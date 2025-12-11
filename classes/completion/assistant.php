@@ -20,29 +20,43 @@
  * @package    mod_openaichat
  * @copyright  2024 think modular
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
-*/
+ */
 
 namespace mod_openaichat\completion;
 
 use mod_openaichat\completion;
-defined('MOODLE_INTERNAL') || die;
 
+/**
+ * Class providing completions for assistant API
+ *
+ * @package    mod_openaichat
+ */
 class assistant extends \mod_openaichat\completion {
+    /** @var string the thread id */
+    private $threadid;
 
-    private $thread_id;
+    /**
+     * Constructor
+     *
+     * @param string $model The model to use
+     * @param string $message The user message
+     * @param array $history The message history
+     * @param object $modsettings The module settings
+     * @param string|null $threadid The thread id, or NULL to create a new thread
+     */
+    public function __construct($model, $message, $history, $modsettings, $threadid) {
+        parent::__construct($model, $message, $history, $modsettings);
 
-    public function __construct($model, $message, $history, $mod_settings, $thread_id) {
-        parent::__construct($model, $message, $history, $mod_settings);
-
-        // If thread_id is NULL, create a new thread
-        if (!$thread_id) {
-            $thread_id = $this->create_thread();
+        // If threadid is NULL, create a new thread.
+        if (!$threadid) {
+            $threadid = $this->create_thread();
         }
-        $this->thread_id = $thread_id;
+        $this->threadid = $threadid;
     }
 
     /**
-     * Given everything we know after constructing the parent, create a completion by constructing the prompt and making the api call
+     * Given everything we know after constructing the parent,
+     * create a completion by constructing the prompt and making the api call
      * @return JSON: The API response from OpenAI
      */
     public function create_completion($context) {
@@ -50,15 +64,19 @@ class assistant extends \mod_openaichat\completion {
         return $this->run();
     }
 
+    /**
+     * Create a new thread
+     * @return string: The thread ID
+     */
     private function create_thread() {
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
                 'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2'
-            ),
-        ));
+                'OpenAI-Beta: assistants=v2',
+            ],
+        ]);
 
         $response = $curl->post("https://api.openai.com/v1/threads");
         $response = json_decode($response);
@@ -66,23 +84,27 @@ class assistant extends \mod_openaichat\completion {
         return $response->id;
     }
 
+    /**
+     * Add the user message to the thread
+     * @return string: The message ID
+     */
     private function add_message_to_thread() {
         $curlbody = [
             "role" => "user",
-            "content" => $this->message
+            "content" => $this->message,
         ];
 
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
                 'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2'
-            ),
-        ));
+                'OpenAI-Beta: assistants=v2',
+            ],
+        ]);
 
         $response = $curl->post(
-            "https://api.openai.com/v1/threads/" . $this->thread_id ."/messages",
+            "https://api.openai.com/v1/threads/" . $this->threadid . "/messages",
             json_encode($curlbody)
         );
         $response = json_decode($response);
@@ -104,16 +126,16 @@ class assistant extends \mod_openaichat\completion {
         }
 
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
                 'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2'
-            ),
-        ));
+                'OpenAI-Beta: assistants=v2',
+            ],
+        ]);
 
         $response = $curl->post(
-            "https://api.openai.com/v1/threads/" . $this->thread_id . "/runs",
+            "https://api.openai.com/v1/threads/" . $this->threadid . "/runs",
             json_encode($curlbody)
         );
         $response = json_decode($response);
@@ -122,42 +144,47 @@ class assistant extends \mod_openaichat\completion {
             throw new \Exception($response->error->message);
         }
 
-        $run_id = $response->id;
-        $run_completed = false;
-        while (!$run_completed) {
-            $run_completed = $this->check_run_status($run_id);
+        $runid = $response->id;
+        $runcompleted = false;
+        while (!$runcompleted) {
+            $runcompleted = $this->check_run_status($runid);
             sleep(1);
         }
 
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
                 'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2'
-            ),
-        ));
-        $response = $curl->get("https://api.openai.com/v1/threads/" . $this->thread_id . '/messages');
+                'OpenAI-Beta: assistants=v2',
+            ],
+        ]);
+        $response = $curl->get("https://api.openai.com/v1/threads/" . $this->threadid . '/messages');
         $response = json_decode($response);
 
         return [
             "id" => $response->data[0]->id,
             "message" => $response->data[0]->content[0]->text->value,
-            "thread_id" => $response->data[0]->thread_id
+            "threadid" => $response->data[0]->threadid,
         ];
     }
 
-    private function check_run_status($run_id) {
+    /**
+     * Check the status of a run
+     * @param string $runid The run ID
+     * @return bool: True if completed, false otherwise
+     */
+    private function check_run_status($runid) {
         $curl = new \curl();
-        $curl->setopt(array(
-            'CURLOPT_HTTPHEADER' => array(
+        $curl->setopt([
+            'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $this->apikey,
                 'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2'
-            ),
-        ));
+                'OpenAI-Beta: assistants=v2',
+            ],
+        ]);
 
-        $response = $curl->get("https://api.openai.com/v1/threads/" . $this->thread_id . "/runs/" . $run_id);
+        $response = $curl->get("https://api.openai.com/v1/threads/" . $this->threadid . "/runs/" . $runid);
         $response = json_decode($response);
 
         if ($response->status === 'completed') {
