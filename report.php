@@ -70,14 +70,14 @@ $tablename = 'mod-openaichat-report';
 $table = new flexible_table($tablename);
 $table->is_downloading($download, $title. $tablename);
 $cols = [
-    'order',
+    'timestamp',
     'sessionid',
     'activity',
     'questions',
     'answers',
 ];
 $headers = [
-    get_string('table:order', 'mod_openaichat'),
+    get_string('time'),
     get_string('table:sessionid', 'mod_openaichat'),
     get_string('table:activity', 'mod_openaichat'),
     get_string('table:questions', 'mod_openaichat'),
@@ -97,18 +97,16 @@ if (!$table->is_downloading()) {
 }
 
 // Add records.
-$order = 1;
 foreach ($records as $record) {
     $activityname = $DB->get_record('openaichat', ['id' => $record->modid])->name;
     $activityurl = '<a href="' . $CFG->wwwroot . '/mod/openaichat/view.php?id=' . $cmid . '">' . $activityname . '</a>';
     $table->add_data([
-        $order,
+        userdate($record->timestamp),
         $record->sesskey,
         $activityurl,
         $record->request,
         $record->response,
     ]);
-    $order += 1;
 }
 $table->finish_output();
 

@@ -81,5 +81,17 @@ function xmldb_openaichat_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2024091901, 'openaichat');
     }
 
+    if ($oldversion < 2025121201) {
+        // Add timestamp field to openaichat_chatlog.
+        $table = new xmldb_table('openaichat_chatlog');
+        $field = new xmldb_field('timestamp', XMLDB_TYPE_INTEGER, '10', null, null, null, '0', 'id');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Openaichat savepoint reached.
+        upgrade_mod_savepoint(true, 2025121201, 'openaichat');
+    }
+
     return true;
 }

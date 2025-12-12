@@ -28,5 +28,5 @@ $plugin->component = 'mod_openaichat';
 $plugin->maturity = MATURITY_STABLE;
 $plugin->requires = 2022041900;
 $plugin->supports = [401, 405];
-$plugin->version = 2025121101;
+$plugin->version = 2025121201;
 $plugin->release = '1.0.0';
