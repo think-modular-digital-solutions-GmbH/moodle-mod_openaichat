@@ -49,7 +49,7 @@ $ADMIN->add(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/apikey',
     get_string('apikey', 'mod_openaichat'),
-    get_string('apikeydesc', 'mod_openaichat'),
+    get_string('apikey_help', 'mod_openaichat'),
     '',
     PARAM_TEXT
 ));
@@ -58,7 +58,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configselect(
     'mod_openaichat/type',
     get_string('type', 'mod_openaichat'),
-    get_string('typedesc', 'mod_openaichat'),
+    get_string('type_help', 'mod_openaichat'),
     'chat',
     ['chat' => 'chat', 'assistant' => 'assistant']
 ));
@@ -67,7 +67,7 @@ $settings->add(new \admin_setting_configselect(
 $settings->add(new \admin_setting_configcheckbox(
     'mod_openaichat/restrictusage',
     get_string('restrictusage', 'mod_openaichat'),
-    get_string('restrictusagedesc', 'mod_openaichat'),
+    get_string('restrictusage_help', 'mod_openaichat'),
     1
 ));
 
@@ -75,7 +75,7 @@ $settings->add(new \admin_setting_configcheckbox(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/assistantname',
     get_string('assistantname', 'mod_openaichat'),
-    get_string('assistantnamedesc', 'mod_openaichat'),
+    get_string('assistantname_help', 'mod_openaichat'),
     'Assistant',
     PARAM_TEXT
 ));
@@ -84,7 +84,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/username',
     get_string('username', 'mod_openaichat'),
-    get_string('usernamedesc', 'mod_openaichat'),
+    get_string('username_help', 'mod_openaichat'),
     'User',
     PARAM_TEXT
 ));
@@ -93,7 +93,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/questionlimit',
     get_string('questionlimit', 'mod_openaichat'),
-    get_string('questionlimitdesc', 'mod_openaichat'),
+    get_string('questionlimit_help', 'mod_openaichat'),
     '',
     PARAM_TEXT
 ));
@@ -110,7 +110,7 @@ $settings->add(new \admin_setting_configtextarea(
 $settings->add(new \admin_setting_configcheckbox(
     'mod_openaichat/allowinstancesettings',
     get_string('allowinstancesettings', 'mod_openaichat'),
-    get_string('allowinstancesettingsdesc', 'mod_openaichat'),
+    get_string('allowinstancesettings_help', 'mod_openaichat'),
     0
 ));
 
@@ -119,14 +119,14 @@ if ($type === 'assistant') {
     $settings->add(new \admin_setting_heading(
         'mod_openaichat/assistantheading',
         get_string('assistantheading', 'mod_openaichat'),
-        get_string('assistantheadingdesc', 'mod_openaichat')
+        get_string('assistantheading_help', 'mod_openaichat')
     ));
 
     if (count($assistantarray)) {
         $settings->add(new \admin_setting_configselect(
             'mod_openaichat/assistant',
             get_string('assistant', 'mod_openaichat'),
-            get_string('assistantdesc', 'mod_openaichat'),
+            get_string('assistant_help', 'mod_openaichat'),
             count($assistantarray) ? reset($assistantarray) : null,
             $assistantarray,
         ));
@@ -141,7 +141,7 @@ if ($type === 'assistant') {
     $settings->add(new \admin_setting_configcheckbox(
         'mod_openaichat/persistconvo',
         get_string('persistconvo', 'mod_openaichat'),
-        get_string('persistconvodesc', 'mod_openaichat'),
+        get_string('persistconvo_help', 'mod_openaichat'),
         1
     ));
 } else {
@@ -149,13 +149,13 @@ if ($type === 'assistant') {
     $settings->add(new \admin_setting_heading(
         'mod_openaichat/chatheading',
         get_string('chatheading', 'mod_openaichat'),
-        get_string('chatheadingdesc', 'mod_openaichat')
+        get_string('chatheading_help', 'mod_openaichat')
     ));
 
     $settings->add(new \admin_setting_configtextarea(
         'mod_openaichat/prompt',
         get_string('prompt', 'mod_openaichat'),
-        get_string('promptdesc', 'mod_openaichat'),
+        get_string('prompt_help', 'mod_openaichat'),
         "Below is a conversation between a user and a support assistant for a Moodle site, where users go for online learning.",
         PARAM_TEXT
     ));
@@ -163,7 +163,7 @@ if ($type === 'assistant') {
     $settings->add(new \admin_setting_configtextarea(
         'mod_openaichat/sourceoftruth',
         get_string('sourceoftruth', 'mod_openaichat'),
-        get_string('sourceoftruthdesc', 'mod_openaichat'),
+        get_string('sourceoftruth_help', 'mod_openaichat'),
         '',
         PARAM_TEXT
     ));
@@ -173,7 +173,7 @@ if ($type === 'assistant') {
 $settings->add(new \admin_setting_heading(
     'mod_openaichat/advanced',
     get_string('advanced', 'mod_openaichat'),
-    get_string('advanceddesc', 'mod_openaichat')
+    get_string('advanced_help', 'mod_openaichat')
 ));
 
 // AI Model.
@@ -182,7 +182,7 @@ $models = array_combine(array_keys($models), array_keys($models));
 $settings->add(new \admin_setting_configselect(
     'mod_openaichat/model',
     get_string('model', 'mod_openaichat'),
-    get_string('modeldesc', 'mod_openaichat'),
+    get_string('model_help', 'mod_openaichat'),
     reset($models),
     $models,
 ));
@@ -190,7 +190,7 @@ $settings->add(new \admin_setting_configselect(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/temperature',
     get_string('temperature', 'mod_openaichat'),
-    get_string('temperaturedesc', 'mod_openaichat'),
+    get_string('temperature_help', 'mod_openaichat'),
     0.5,
     PARAM_FLOAT
 ));
@@ -198,7 +198,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/maxlength',
     get_string('maxlength', 'mod_openaichat'),
-    get_string('maxlengthdesc', 'mod_openaichat'),
+    get_string('maxlength_help', 'mod_openaichat'),
     500,
     PARAM_INT
 ));
@@ -206,7 +206,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/topp',
     get_string('topp', 'mod_openaichat'),
-    get_string('toppdesc', 'mod_openaichat'),
+    get_string('topp_help', 'mod_openaichat'),
     1,
     PARAM_FLOAT
 ));
@@ -214,7 +214,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/frequency',
     get_string('frequency', 'mod_openaichat'),
-    get_string('frequencydesc', 'mod_openaichat'),
+    get_string('frequency_help', 'mod_openaichat'),
     1,
     PARAM_FLOAT
 ));
@@ -222,7 +222,7 @@ $settings->add(new \admin_setting_configtext(
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/presence',
     get_string('presence', 'mod_openaichat'),
-    get_string('presencedesc', 'mod_openaichat'),
+    get_string('presence_help', 'mod_openaichat'),
     1,
     PARAM_FLOAT
 ));
