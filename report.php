@@ -24,68 +24,95 @@
 
 require_once('../../config.php');
 require_once($CFG->libdir . '/filelib.php');
-require_once($CFG->dirroot . '/mod/openaichat/lib.php');
 
-echo '<script src="https://code.jquery.com/jquery-3.7.1.js"></script>
-      <link rel="stylesheet" href="https://cdn.datatables.net/2.0.0/css/dataTables.dataTables.min.css">
-      <link rel="stylesheet" href="https://cdn.datatables.net/buttons/3.0.0/css/buttons.dataTables.min.css">
-      <script src="https://cdn.datatables.net/2.0.0/js/dataTables.min.js"></script>
-      <script src="https://cdn.datatables.net/buttons/3.0.0/js/dataTables.buttons.min.js"></script>
-      <script src="https://cdn.datatables.net/buttons/3.0.0/js/buttons.html5.min.js"></script>
-      ';
+defined('MOODLE_INTERNAL') || die();
 
-global $COURSE;
+require_login();
+
+global $COURSE, $DB;
+
+// Get parameters.
 $cmid = optional_param('cmid', null, PARAM_INT);
 $modid = optional_param('modid', null, PARAM_INT);
-$context = context_module::instance($cmid);
+if ($cmid) {
+    $context = context_module::instance($cmid);
+} else {
+    $context = context_system::instance();
+}
 
-if (!is_siteadmin()) {
+// Check permissions.
+if (!is_siteadmin() && $context) {
     if (!has_capability('mod/openaichat:seeopenailog', $context)) {
         exit;
     }
 }
 
-require_login();
+// Set up page.
+$url = new moodle_url('/mod/openaichat/report.php');
+$title = get_string('openailog', 'mod_openaichat');
+$PAGE->set_url($url);
+$PAGE->set_context($context);
+$PAGE->set_title($title);
+$PAGE->set_heading($title);
 
-global $DB;
+// Download handling.
+$download = optional_param('download', '', PARAM_ALPHA);
 
+// Get records.
 if (empty($modid)) {
     $records = $DB->get_records('openaichat_chatlog');
 } else {
     $records = $DB->get_records('openaichat_chatlog', ['modid' => $modid]);
 }
 
-echo $OUTPUT->header();
-$table = new html_table();
-$table->head = [
+// Create table.
+$tablename = 'mod-openaichat-report';
+$table = new flexible_table($tablename);
+$table->is_downloading($download, $title. $tablename);
+$cols = [
     'order',
-    'Session id',
-    'Activity',
-    'Questions',
-    'Answers',
+    'sessionid',
+    'activity',
+    'questions',
+    'answers',
 ];
+$headers = [
+    get_string('table:order', 'mod_openaichat'),
+    get_string('table:sessionid', 'mod_openaichat'),
+    get_string('table:activity', 'mod_openaichat'),
+    get_string('table:questions', 'mod_openaichat'),
+    get_string('table:answers', 'mod_openaichat'),
+];
+$table->define_columns($cols);
+$table->define_headers($headers);
+$table->sortable(true);
+$table->pageable(true);
+$table->define_baseurl($url);
+$table->is_downloadable(true);
+$table->setup();
+
+// Print the header.
+if (!$table->is_downloading()) {
+    echo $OUTPUT->header();
+}
+
+// Add records.
 $order = 1;
 foreach ($records as $record) {
     $activityname = $DB->get_record('openaichat', ['id' => $record->modid])->name;
     $activityurl = '<a href="' . $CFG->wwwroot . '/mod/openaichat/view.php?id=' . $cmid . '">' . $activityname . '</a>';
-    $table->data[] = [
+    $table->add_data([
         $order,
         $record->sesskey,
         $activityurl,
         $record->request,
         $record->response,
-    ];
+    ]);
     $order += 1;
 }
-echo html_writer::table($table);
+$table->finish_output();
 
-echo "<script>let table = new DataTable('.generaltable', {
-    dom: 'Bfrtip',
-    buttons: [
-        'csv'
-    ]
-});
-console.log(table);</script>
-";
-
-echo $OUTPUT->footer();
+// Print the footer.
+if (!$table->is_downloading()) {
+    echo $OUTPUT->footer();
+}
