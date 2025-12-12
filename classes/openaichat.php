@@ -25,6 +25,7 @@
 namespace mod_openaichat;
 
 use mod_openaichat\form\termsacceptform;
+use core\output\notification;
 
 /**
  * Module class
@@ -117,7 +118,6 @@ class openaichat {
         } else {
             $apikey = get_config('mod_openaichat', 'apikey');
         }
-
         if (!$apikey) {
             return [];
         }
@@ -127,18 +127,33 @@ class openaichat {
             'CURLOPT_HTTPHEADER' => [
                 'Authorization: Bearer ' . $apikey,
                 'Content-Type: application/json',
+                'OpenAI-Beta: assistants=v2',
             ],
         ]);
 
         $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
         $response = json_decode($response);
+
+        // Check for errors in the response.
+        if (isset($response->error)) {
+
+            // Show error.
+            $error = get_string('connection:error', 'mod_openaichat', $response->error->message);
+            \core\notification::add($error, notification::NOTIFY_ERROR);
+            return [];
+        }
+
+        // Show success.
+        $error = get_string('connection:success', 'mod_openaichat');
+        \core\notification::add($error, notification::NOTIFY_SUCCESS);
+
+        // Process and return assistants.
         $assistants = [];
         if (property_exists($response, 'data') && is_array($response->data)) {
             foreach ($response->data as $assistant) {
                 $assistants[$assistant->id] = $assistant->name;
             }
         }
-
         return $assistants;
     }
 

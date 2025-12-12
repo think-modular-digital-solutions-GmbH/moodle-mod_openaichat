@@ -28,22 +28,37 @@ use mod_openaichat\openaichat;
 
 require_once($CFG->dirroot . '/mod/openaichat/lib.php');
 
-$type = openaichat::get_type_to_display();
-$assistantarray = openaichat::fetch_assistants_array();
-
 global $PAGE, $ADMIN;
 
+// JS for conditionally showing settings.
 $PAGE->requires->js_call_amd('mod_openaichat/settings', 'init');
 
+// Get type and assistants - only if on own settings page.
+$type = 'chat';
+$assistantarray = [];
+if (array_key_exists('section', $_GET) && $_GET['section'] == 'modsettingopenaichat') {
+    $type = openaichat::get_type_to_display();
+    $assistantarray = openaichat::fetch_assistants_array();
+}
+
+// Report log page.
+$reporturl = new moodle_url('/mod/openaichat/report.php');
 $ADMIN->add(
     'reports',
     new admin_externalpage(
         'mod_openaichat_reportlog',
         get_string('openailog', 'mod_openaichat'),
-        "$CFG->wwwroot/mod/openaichat/report.php",
+        $reporturl,
         'report/log:view'
     )
 );
+
+// Link to reports on settings page.
+$settings->add(new \admin_setting_heading(
+    'mod_openaichat/reportloglink',
+    '',
+    html_writer::link($reporturl, get_string('openailog', 'mod_openaichat'))
+));
 
 // API Key.
 $settings->add(new \admin_setting_configtext(
@@ -116,6 +131,7 @@ $settings->add(new \admin_setting_configcheckbox(
 
 // Assistant settings.
 if ($type === 'assistant') {
+    // Assistant settings.
     $settings->add(new \admin_setting_heading(
         'mod_openaichat/assistantheading',
         get_string('assistantheading', 'mod_openaichat'),
@@ -123,6 +139,7 @@ if ($type === 'assistant') {
     ));
 
     if (count($assistantarray)) {
+        // Assistants available.
         $settings->add(new \admin_setting_configselect(
             'mod_openaichat/assistant',
             get_string('assistant', 'mod_openaichat'),
@@ -131,6 +148,7 @@ if ($type === 'assistant') {
             $assistantarray,
         ));
     } else {
+        // No assistants available.
         $settings->add(new \admin_setting_description(
             'mod_openaichat/noassistants',
             get_string('assistant', 'mod_openaichat'),
@@ -152,6 +170,7 @@ if ($type === 'assistant') {
         get_string('chatheading_help', 'mod_openaichat')
     ));
 
+    // Prompt.
     $settings->add(new \admin_setting_configtextarea(
         'mod_openaichat/prompt',
         get_string('prompt', 'mod_openaichat'),
@@ -160,6 +179,7 @@ if ($type === 'assistant') {
         PARAM_TEXT
     ));
 
+    // Source of Truth.
     $settings->add(new \admin_setting_configtextarea(
         'mod_openaichat/sourceoftruth',
         get_string('sourceoftruth', 'mod_openaichat'),
