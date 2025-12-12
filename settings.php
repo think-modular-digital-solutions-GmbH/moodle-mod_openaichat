@@ -45,6 +45,7 @@ $ADMIN->add(
     )
 );
 
+// API Key.
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/apikey',
     get_string('apikey', 'mod_openaichat'),
@@ -53,6 +54,7 @@ $settings->add(new \admin_setting_configtext(
     PARAM_TEXT
 ));
 
+// Type of AI interaction.
 $settings->add(new \admin_setting_configselect(
     'mod_openaichat/type',
     get_string('type', 'mod_openaichat'),
@@ -61,6 +63,7 @@ $settings->add(new \admin_setting_configselect(
     ['chat' => 'chat', 'assistant' => 'assistant']
 ));
 
+// Restrict usage.
 $settings->add(new \admin_setting_configcheckbox(
     'mod_openaichat/restrictusage',
     get_string('restrictusage', 'mod_openaichat'),
@@ -68,6 +71,7 @@ $settings->add(new \admin_setting_configcheckbox(
     1
 ));
 
+// Assistant name.
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/assistantname',
     get_string('assistantname', 'mod_openaichat'),
@@ -76,6 +80,7 @@ $settings->add(new \admin_setting_configtext(
     PARAM_TEXT
 ));
 
+// Username.
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/username',
     get_string('username', 'mod_openaichat'),
@@ -84,12 +89,29 @@ $settings->add(new \admin_setting_configtext(
     PARAM_TEXT
 ));
 
+// Question limit.
 $settings->add(new \admin_setting_configtext(
     'mod_openaichat/questionlimit',
     get_string('questionlimit', 'mod_openaichat'),
     get_string('questionlimitdesc', 'mod_openaichat'),
     '',
     PARAM_TEXT
+));
+
+// Models.
+$settings->add(new \admin_setting_configtextarea(
+    'mod_openaichat/models',
+    get_string('models', 'mod_openaichat'),
+    get_string('models_desc', 'mod_openaichat'),
+    openaichat::DEFAULT_MODELS,
+));
+
+// Allow instance.
+$settings->add(new \admin_setting_configcheckbox(
+    'mod_openaichat/allowinstancesettings',
+    get_string('allowinstancesettings', 'mod_openaichat'),
+    get_string('allowinstancesettingsdesc', 'mod_openaichat'),
+    0
 ));
 
 // Assistant settings.
@@ -154,59 +176,54 @@ $settings->add(new \admin_setting_heading(
     get_string('advanceddesc', 'mod_openaichat')
 ));
 
-$settings->add(new \admin_setting_configcheckbox(
-    'mod_openaichat/allowinstancesettings',
-    get_string('allowinstancesettings', 'mod_openaichat'),
-    get_string('allowinstancesettingsdesc', 'mod_openaichat'),
-    0
+// AI Model.
+$models = openaichat::get_ai_models();
+$models = array_combine(array_keys($models), array_keys($models));
+$settings->add(new \admin_setting_configselect(
+    'mod_openaichat/model',
+    get_string('model', 'mod_openaichat'),
+    get_string('modeldesc', 'mod_openaichat'),
+    reset($models),
+    $models,
 ));
 
-if ($type !== 'assistant') {
-    $settings->add(new \admin_setting_configselect(
-        'mod_openaichat/model',
-        get_string('model', 'mod_openaichat'),
-        get_string('modeldesc', 'mod_openaichat'),
-        'text-davinci-003',
-        openaichat::get_ai_models()['models']
-    ));
+$settings->add(new \admin_setting_configtext(
+    'mod_openaichat/temperature',
+    get_string('temperature', 'mod_openaichat'),
+    get_string('temperaturedesc', 'mod_openaichat'),
+    0.5,
+    PARAM_FLOAT
+));
 
-    $settings->add(new \admin_setting_configtext(
-        'mod_openaichat/temperature',
-        get_string('temperature', 'mod_openaichat'),
-        get_string('temperaturedesc', 'mod_openaichat'),
-        0.5,
-        PARAM_FLOAT
-    ));
+$settings->add(new \admin_setting_configtext(
+    'mod_openaichat/maxlength',
+    get_string('maxlength', 'mod_openaichat'),
+    get_string('maxlengthdesc', 'mod_openaichat'),
+    500,
+    PARAM_INT
+));
 
-    $settings->add(new \admin_setting_configtext(
-        'mod_openaichat/maxlength',
-        get_string('maxlength', 'mod_openaichat'),
-        get_string('maxlengthdesc', 'mod_openaichat'),
-        500,
-        PARAM_INT
-    ));
+$settings->add(new \admin_setting_configtext(
+    'mod_openaichat/topp',
+    get_string('topp', 'mod_openaichat'),
+    get_string('toppdesc', 'mod_openaichat'),
+    1,
+    PARAM_FLOAT
+));
 
-    $settings->add(new \admin_setting_configtext(
-        'mod_openaichat/topp',
-        get_string('topp', 'mod_openaichat'),
-        get_string('toppdesc', 'mod_openaichat'),
-        1,
-        PARAM_FLOAT
-    ));
+$settings->add(new \admin_setting_configtext(
+    'mod_openaichat/frequency',
+    get_string('frequency', 'mod_openaichat'),
+    get_string('frequencydesc', 'mod_openaichat'),
+    1,
+    PARAM_FLOAT
+));
 
-    $settings->add(new \admin_setting_configtext(
-        'mod_openaichat/frequency',
-        get_string('frequency', 'mod_openaichat'),
-        get_string('frequencydesc', 'mod_openaichat'),
-        1,
-        PARAM_FLOAT
-    ));
+$settings->add(new \admin_setting_configtext(
+    'mod_openaichat/presence',
+    get_string('presence', 'mod_openaichat'),
+    get_string('presencedesc', 'mod_openaichat'),
+    1,
+    PARAM_FLOAT
+));
 
-    $settings->add(new \admin_setting_configtext(
-        'mod_openaichat/presence',
-        get_string('presence', 'mod_openaichat'),
-        get_string('presencedesc', 'mod_openaichat'),
-        1,
-        PARAM_FLOAT
-    ));
-}

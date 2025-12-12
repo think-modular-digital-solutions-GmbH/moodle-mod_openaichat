@@ -32,6 +32,21 @@ use mod_openaichat\form\termsacceptform;
  * @package    openaichat
  */
 class openaichat {
+
+    const DEFAULT_MODELS = "gpt-5.2, chat
+        gpt-5.1, chat
+        gpt-5, chat
+        gpt-5-mini, chat
+        gpt-5-nano, chat
+        gpt-4.1, chat
+        gpt-4.1-mini, chat
+        gpt-4.1-nano, chat
+        gpt-4o, chat
+        gpt-4o-mini, chat
+        o3, chat
+        o3-mini, chat
+        o4-mini, chat";
+
     /**
      * Render the OpenAI chat module.
      */
@@ -133,47 +148,21 @@ class openaichat {
      * @return array Associative array containing models and their types.
      */
     public static function get_ai_models() {
-        return [
-            "models" => [
-                'gpt-4.1' => 'gpt-4.1',
-                'gpt-4.1-mini' => 'gpt-4.1-mini',
-                'gpt-4.1-nano' => 'gpt-4.1-nano',
-                'gpt-4o' => 'gpt-4o',
-                'gpt-4o-mini' => 'gpt-4o-mini',
-                'o3-mini-2025-01-31' => 'o3-mini-2025-01-31',
-                'o3-mini' => 'o3-mini',
-                'o1-2024-12-17' => 'o1-2024-12-17',
-                'o1' => 'o1',
-                'gpt-4o-mini-2024-07-18' => 'gpt-4o-mini-2024-07-18',
-                'gpt-4o-2024-11-20' => 'gpt-4o-2024-11-20',
-                'gpt-4' => 'gpt-4',
-                'gpt-4-1106-preview' => 'gpt-4-1106-preview',
-                'gpt-4-0613' => 'gpt-4-0613',
-                'gpt-3.5-turbo' => 'gpt-3.5-turbo',
-                'gpt-3.5-turbo-16k' => 'gpt-3.5-turbo-16k',
-                'gpt-3.5-turbo-1106' => 'gpt-3.5-turbo-1106',
+        $modelsconfig = get_config('mod_openaichat', 'models');
+        if (empty($modelsconfig)) {
+            $modelsconfig = self::DEFAULT_MODELS;
+        }
 
-            ],
-            "types" => [
-                'gpt-4.1' => 'chat',
-                'gpt-4.1-mini' => 'chat',
-                'gpt-4.1-nano' => 'chat',
-                'gpt-4o' => 'chat',
-                'gpt-4o-mini' => 'chat',
-                'o3-mini-2025-01-31' => 'chat',
-                'o3-mini' => 'chat',
-                'o1-2024-12-17' => 'chat',
-                'o1' => 'chat',
-                'gpt-4o-mini-2024-07-18' => 'chat',
-                'gpt-4o-2024-11-20' => 'chat',
-                'gpt-4' => 'chat',
-                'gpt-4-1106-preview' => 'chat',
-                'gpt-4-0613' => 'chat',
-                'gpt-3.5-turbo' => 'chat',
-                'gpt-3.5-turbo-16k' => 'chat',
-                'gpt-3.5-turbo-1106' => 'chat',
-            ],
-        ];
+        $lines = explode("\n", trim($modelsconfig));
+        $models = [];
+        foreach ($lines as $line) {
+            $parts = array_map('trim', explode(',', $line));
+            if (count($parts) === 2) {
+                $models[$parts[0]] = $parts[1];
+            }
+        }
+
+        return $models;
     }
 
     /**
