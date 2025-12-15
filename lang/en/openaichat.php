@@ -54,7 +54,7 @@ $string['maxlength_help'] = 'The maximum number of token to generate. Requests c
 $string['model'] = 'Model';
 $string['model_help'] = 'The model which will generate the completion. Some models are suitable for natural language tasks, others specialize in code.';
 $string['models'] = 'Available models.';
-$string['models_desc'] = 'A list of available AI models that can be used in the Open AI Chat activity. Format: one model per line, name of the model and type (chat or assistant), separated by comma. eg: "gpt-5.2, chat"';
+$string['models_desc'] = 'A list of available AI models that can be used in the Open AI Chat activity. Format: one model per line. eg: "gpt-5.2"';
 $string['modulename'] = 'Open AI Chat';
 $string['modulenameplural'] = 'Open AI Chats';
 $string['noassistants'] = 'You have not created any assistants yet. You need to create one <a target="_blank" href="https://platform.openai.com/assistants">in your OpenAI account</a> before you can select it here.';

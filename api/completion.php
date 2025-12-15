@@ -76,23 +76,20 @@ foreach ($settings as $setting) {
     }
 }
 
+// Get mod settings.
 $modsettings['modid'] = $modid;
-$engineclass;
-$model = $instance->model;
 $apitype = $instance->type;
+$engineclass = "\mod_openaichat\completion\{$apitype}";
 
-if ($apitype === 'assistant') {
-    $engineclass = '\mod_openaichat\completion\assistant';
-} else {
-    $engines = openaichat::get_ai_models()['types'];
-    if (get_config('mod_openaichat', 'allowinstancesettings') === "1" && $model) {
-        $model = $model;
-    }
-    if (!$model) {
-        $model = 'gpt-3.5-turbo';
-    }
-    $engineclass = '\mod_openaichat\completion\\' . $engines[$model];
+$model = null;
+if (get_config('mod_openaichat', 'allowinstancesettings') === "1") {
+    $model = $instance->model;
 }
+if (!$model) {
+    $model = get_config('mod_openaichat', 'defaultmodel');
+}
+
+
 $completion = new $engineclass(...[$model, $message, $history, $modsettings, $threadid]);
 $response = $completion->create_completion($PAGE->context);
 

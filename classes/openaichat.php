@@ -34,19 +34,50 @@ use core\output\notification;
  */
 class openaichat {
 
-    const DEFAULT_MODELS = "gpt-5.2, chat
-        gpt-5.1, chat
-        gpt-5, chat
-        gpt-5-mini, chat
-        gpt-5-nano, chat
-        gpt-4.1, chat
-        gpt-4.1-mini, chat
-        gpt-4.1-nano, chat
-        gpt-4o, chat
-        gpt-4o-mini, chat
-        o3, chat
-        o3-mini, chat
-        o4-mini, chat";
+    const DEFAULT_MODELS = "gpt-5.2
+        gpt-5.1
+        gpt-5
+        gpt-5-mini
+        gpt-5-nano
+        gpt-4.1
+        gpt-4.1-mini
+        gpt-4.1-nano
+        gpt-4o
+        gpt-4o-mini
+        o3
+        o3-mini
+        o4-mini";
+
+    /**
+     * Make the API call to OpenAI.
+     *
+     * @param string $url The API endpoint URL.
+     * @param string $apikey The API key for authentication.
+     * @param array|null $data The data to send in the request body (for POST requests).
+     * @param array $additionalheaders Additional headers to include in the request.
+     * @return object The decoded JSON response from the API.
+     */
+    public static function api_call($url, $apikey, $data = null, $additionalheaders = []) {
+        $headers = [
+            'Content-Type: application/json',
+            'Authorization: Bearer ' . $apikey,
+        ];
+        $headers = array_merge($headers, $additionalheaders);
+
+        $curl = curl_init($url);
+        curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($curl, CURLOPT_HTTPHEADER, $headers);
+
+        if ($data !== null) {
+            curl_setopt($curl, CURLOPT_POST, true);
+            curl_setopt($curl, CURLOPT_POSTFIELDS, json_encode($data));
+        }
+
+        $response = curl_exec($curl);
+        curl_close($curl);
+
+        return json_decode($response);
+    }
 
     /**
      * Render the OpenAI chat module.
@@ -107,32 +138,15 @@ class openaichat {
     /**
      * Fetch assistants from OpenAI API and return as an array.
      *
-     * @param int|null $blockid The block ID (not used in this function).
      * @param int|null $modid The module instance ID to get specific API key.
      * @return array Associative array of assistant IDs and names.
      */
-    public static function fetch_assistants_array($blockid = null, $modid = null) {
-        if (!empty($modid)) {
-            $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
-            $apikey = $instance->apikey;
-        } else {
-            $apikey = get_config('mod_openaichat', 'apikey');
-        }
-        if (!$apikey) {
-            return [];
-        }
-
-        $curl = new \curl();
-        $curl->setopt([
-            'CURLOPT_HTTPHEADER' => [
-                'Authorization: Bearer ' . $apikey,
-                'Content-Type: application/json',
-                'OpenAI-Beta: assistants=v2',
-            ],
-        ]);
-
-        $response = $curl->get("https://api.openai.com/v1/assistants?order=desc");
-        $response = json_decode($response);
+    public static function fetch_assistants($modid = null) {
+        // API endpoint to fetch assistants.
+        $url = 'https://api.openai.com/v1/assistants?order=desc';
+        $apikey = self::get_api_key($modid);
+        $additionalheaders = ['OpenAI-Beta: assistants=v2'];
+        $response = self::api_call($url, $apikey, null, $additionalheaders);
 
         // Check for errors in the response.
         if (isset($response->error)) {
@@ -151,6 +165,7 @@ class openaichat {
         $assistants = [];
         if (property_exists($response, 'data') && is_array($response->data)) {
             foreach ($response->data as $assistant) {
+                $name = isset($assistant->name) ? $assistant->name : $assistant->id;
                 $assistants[$assistant->id] = $assistant->name;
             }
         }
@@ -257,5 +272,24 @@ class openaichat {
         : get_string('apikeymissing', 'mod_openaichat');
 
         return $content;
+    }
+
+    /**
+     * Get API key for a given module instance or site-wide.
+     *
+     * @param int|null $modid The module instance ID.
+     * @return string The API key.
+     */
+    private static function get_api_key($modid = null) {
+        global $DB;
+
+        if ($modid !== null) {
+            $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+            if (!empty($instance->apikey)) {
+                return $instance->apikey;
+            }
+        }
+
+        return get_config('mod_openaichat', 'apikey');
     }
 }
