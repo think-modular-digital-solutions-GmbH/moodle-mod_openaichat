@@ -35,10 +35,10 @@ $PAGE->requires->js_call_amd('mod_openaichat/settings', 'init');
 
 // Get type and assistants - only if on own settings page.
 $type = 'chat';
-$assistantarray = [];
+$assistants = [];
 if (array_key_exists('section', $_GET) && $_GET['section'] == 'modsettingopenaichat') {
     $type = openaichat::get_type_to_display();
-    $assistantarray = openaichat::fetch_assistants_array();
+    $assistants = openaichat::fetch_assistants();
 }
 
 // Report log page.
@@ -138,14 +138,14 @@ if ($type === 'assistant') {
         get_string('assistantheading_help', 'mod_openaichat')
     ));
 
-    if (count($assistantarray)) {
+    if (count($assistants) > 0) {
         // Assistants available.
         $settings->add(new \admin_setting_configselect(
             'mod_openaichat/assistant',
             get_string('assistant', 'mod_openaichat'),
             get_string('assistant_help', 'mod_openaichat'),
-            count($assistantarray) ? reset($assistantarray) : null,
-            $assistantarray,
+            count($assistants) ? reset($assistants) : null,
+            $assistants,
         ));
     } else {
         // No assistants available.
