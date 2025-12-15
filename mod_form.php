@@ -149,14 +149,12 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->addHelpButton('username', 'username', 'mod_openaichat');
             $mform->setType('username', PARAM_TEXT);
 
-            // Assistant settings fieldset.
+            // API settings fieldset.
             $mform->addElement(
                 'header',
-                'assistantheading',
-                get_string('assistantheading', 'mod_openaichat')
+                'apisettingsheading',
+                get_string('apisettings', 'mod_openaichat')
             );
-            $mform->addHelpButton('assistantheading', 'assistantheading', 'mod_openaichat');
-            $mform->setType('assistantheading', PARAM_TEXT);
 
             // Assistant selection.
             if (count($assistantarray)) {
@@ -178,6 +176,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
                 );
             }
             $mform->setType('assistant', PARAM_TEXT);
+            $mform->hideIf('assistant', 'type', 'neq', 'assistant');
 
             // Persist conversation.
             $mform->addElement(
@@ -188,15 +187,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('persistconvo', get_config('mod_openaichat', 'persistconvo'));
             $mform->addHelpButton('persistconvo', 'persistconvo', 'mod_openaichat');
             $mform->setType('persistconvo', PARAM_INT);
-
-            // Chat settings fieldset.
-            $mform->addElement(
-                'header',
-                'chatheading',
-                get_string('chatheading', 'mod_openaichat')
-            );
-            $mform->addHelpButton('chatheading', 'chatheading', 'mod_openaichat');
-            $mform->setType('chatheading', PARAM_TEXT);
+            $mform->hideIf('persistconvo', 'type', 'neq', 'assistant');
 
             // Prompt.
             $mform->addElement(
@@ -208,6 +199,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('prompt', get_config('mod_openaichat', 'prompt'));
             $mform->addHelpButton('prompt', 'prompt', 'mod_openaichat');
             $mform->setType('prompt', PARAM_TEXT);
+            $mform->hideIf('prompt', 'type', 'neq', 'chat');
 
             // Source of truth.
             $mform->addElement(
@@ -219,15 +211,16 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('sourceoftruth', get_config('mod_openaichat', 'sourceoftruth'));
             $mform->addHelpButton('sourceoftruth', 'sourceoftruth', 'mod_openaichat');
             $mform->setType('sourceoftruth', PARAM_TEXT);
+            $mform->hideIf('sourceoftruth', 'type', 'neq', 'chat');
 
             // Advanced settings fieldset.
             $mform->addElement(
-                'header',
-                'advanced',
-                get_string('advanced', 'mod_openaichat')
+                'static',
+                'advancedsettingsheading',
+                get_string('advanced', 'mod_openaichat'),
+                '<strong>' . get_string('advanced_help', 'mod_openaichat') . '</strong>'
             );
-            $mform->addHelpButton('advanced', 'advanced', 'mod_openaichat');
-            $mform->setType('advanced', PARAM_TEXT);
+            $mform->hideIf('advancedsettingsheading', 'type', 'neq', 'chat');
 
             // Model.
             $mform->addElement(
@@ -239,6 +232,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('model', get_config('mod_openaichat', 'model'));
             $mform->addHelpButton('model', 'model', 'mod_openaichat');
             $mform->setType('model', PARAM_TEXT);
+            $mform->hideIf('model', 'type', 'neq', 'chat');
 
             // Temperature.
             $mform->addElement(
@@ -250,6 +244,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('temperature', get_config('mod_openaichat', 'temperature'));
             $mform->addHelpButton('temperature', 'temperature', 'mod_openaichat');
             $mform->setType('temperature', PARAM_FLOAT);
+            $mform->hideIf('temperature', 'type', 'neq', 'chat');
 
             // Max tokens.
             $mform->addElement(
@@ -261,6 +256,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('maxlength', get_config('mod_openaichat', 'maxlength'));
             $mform->addHelpButton('maxlength', 'maxlength', 'mod_openaichat');
             $mform->setType('maxlength', PARAM_INT);
+            $mform->hideIf('maxlength', 'type', 'neq', 'chat');
 
             // Top-p.
             $mform->addElement(
@@ -272,6 +268,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('topp', get_config('mod_openaichat', 'topp'));
             $mform->addHelpButton('topp', 'topp', 'mod_openaichat');
             $mform->setType('topp', PARAM_FLOAT);
+            $mform->hideIf('topp', 'type', 'neq', 'chat');
 
             // Frequency penalty.
             $mform->addElement(
@@ -283,6 +280,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('frequency', get_config('mod_openaichat', 'frequency'));
             $mform->addHelpButton('frequency', 'frequency', 'mod_openaichat');
             $mform->setType('frequency', PARAM_FLOAT);
+            $mform->hideIf('frequency', 'type', 'neq', 'chat');
 
             // Presence penalty.
             $mform->addElement(
@@ -294,6 +292,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('presence', get_config('mod_openaichat', 'presence'));
             $mform->addHelpButton('presence', 'presence', 'mod_openaichat');
             $mform->setType('presence', PARAM_FLOAT);
+            $mform->hideIf('presence', 'type', 'neq', 'chat');
         } else {
             // Instance-level settings disabled message.
             $mform->addElement(

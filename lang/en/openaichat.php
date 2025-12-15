@@ -25,12 +25,13 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['advanced'] = 'Advanced settings';
-$string['advanced_help'] = 'Advanced arguments sent to OpenAI. Don\'t touch unless you know what you\'re doing!';
+$string['advanced_help'] = 'Advanced arguments sent to OpenAI. Do not touch unless you know what you\'re doing!';
 $string['allowinstancesettings'] = 'Instance-level settings';
 $string['allowinstancesettings_help'] = 'This setting will allow teachers, or anyone with the capability to add an activity in a context, to adjust settings at a per-activity level. Enabling this could incur additional charges by allowing non-admins to choose higher-cost models or other settings.';
 $string['apikey'] = 'OpenAI API Key';
 $string['apikey_help'] = 'The API Key for your OpenAI account. <a href=?section=modsettingopenaichat&testconnection=1>Test connection</a>.';
 $string['apikeymissing'] = 'Please add your OpenAI API key to the activity settings.';
+$string['apisettings'] = 'API settings';
 $string['askaquestion'] = 'Ask a question...';
 $string['assistant'] = 'Assistant';
 $string['assistant_help'] = 'The default assistant attached to your OpenAI account that you would like to use for the response';
