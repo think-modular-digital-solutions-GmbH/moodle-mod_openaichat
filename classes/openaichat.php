@@ -26,6 +26,8 @@ namespace mod_openaichat;
 
 use mod_openaichat\form\termsacceptform;
 use core\output\notification;
+use moodle_url;
+use stdClass;
 
 /**
  * Module class
@@ -35,18 +37,18 @@ use core\output\notification;
 class openaichat {
 
     const DEFAULT_MODELS = "gpt-5.2
-        gpt-5.1
-        gpt-5
-        gpt-5-mini
-        gpt-5-nano
-        gpt-4.1
-        gpt-4.1-mini
-        gpt-4.1-nano
-        gpt-4o
-        gpt-4o-mini
-        o3
-        o3-mini
-        o4-mini";
+gpt-5.1
+gpt-5
+gpt-5-mini
+gpt-5-nano
+gpt-4.1
+gpt-4.1-mini
+gpt-4.1-nano
+gpt-4o
+gpt-4o-mini
+o3
+o3-mini
+o4-mini";
 
     /**
      * Make the API call to OpenAI.
@@ -80,19 +82,16 @@ class openaichat {
     }
 
     /**
-     * Render the OpenAI chat module.
+     * Redirec to to terms of use if not accepted yet.
      */
-    public static function render() {
+    public static function termsofuse() {
         global $PAGE, $USER, $DB;
 
         $modid = $PAGE->cm->instance;
         $userid = $USER->id;
 
         $rowtermsaccepted = $DB->get_record('openaichat_usertermsofuse', ['modid' => $modid, 'userid' => $userid]);
-        if ($rowtermsaccepted !== false && $rowtermsaccepted->termsofuseaccepted > 0) {
-            $c = self::get_content();
-            return '<div class="mod_openaichat"><div class="alert alert-warning"><p>' . get_string('disclaimer', 'mod_openaichat') . '</p></div><p id="remaining-questions"></p>' . $c->text . $c->footer . '</div>';
-        } else {
+        if ($rowtermsaccepted == false || $rowtermsaccepted->termsofuseaccepted == 0) {
             $form = new termsacceptform();
             if ($form->is_submitted()) {
                 $data = $form->get_data();
@@ -124,6 +123,14 @@ class openaichat {
     }
 
     /**
+     * Render the OpenAI chat module content.
+     */
+    public static function render() {
+        $c = self::get_content();
+        return '<div class="mod_openaichat"><div class="alert alert-warning"><p>' . get_string('disclaimer', 'mod_openaichat') . '</p></div><p id="remaining-questions"></p>' . $c->text . $c->footer . '</div>';
+    }
+
+    /**
      * This is for site level settings.
      */
     public static function get_type_to_display() {
@@ -152,14 +159,18 @@ class openaichat {
         if (isset($response->error)) {
 
             // Show error.
-            $error = get_string('connection:error', 'mod_openaichat', $response->error->message);
-            \core\notification::add($error, notification::NOTIFY_ERROR);
+            if (isset($_GET['testconnection'])) {
+                $error = get_string('connection:error', 'mod_openaichat', $response->error->message);
+                \core\notification::add($error, notification::NOTIFY_ERROR);
+            }
             return [];
         }
 
         // Show success.
-        $error = get_string('connection:success', 'mod_openaichat');
-        \core\notification::add($error, notification::NOTIFY_SUCCESS);
+        if (isset($_GET['testconnection'])) {
+            $error = get_string('connection:success', 'mod_openaichat');
+            \core\notification::add($error, notification::NOTIFY_SUCCESS);
+        }
 
         // Process and return assistants.
         $assistants = [];
@@ -186,12 +197,9 @@ class openaichat {
         $lines = explode("\n", trim($modelsconfig));
         $models = [];
         foreach ($lines as $line) {
-            $parts = array_map('trim', explode(',', $line));
-            if (count($parts) === 2) {
-                $models[$parts[0]] = $parts[1];
-            }
+            $line = trim($line);
+            $models[$line] = $line;
         }
-
         return $models;
     }
 
@@ -219,11 +227,12 @@ class openaichat {
      * Get the content for the OpenAI chat module.
      */
     private static function get_content() {
-        global $PAGE, $USER;
+        global $DB, $PAGE, $USER;
 
         $modid = $PAGE->cm->instance;
         $context = $PAGE->cm->context;
         $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+        $apikey = self::get_api_key($modid);
 
         // Send data to front end.
         $persistconvo = $instance->persistconvo;
@@ -249,7 +258,6 @@ class openaichat {
             </script>
 
             <style>
-                ' . $showlabelscss . '
                 .openai_message.user:before {
                     content: "' . $username . '";
                 }
@@ -261,7 +269,7 @@ class openaichat {
             <div id="openai_chat_log" role="log"></div>
         ';
 
-        $content->footer = $instance->apikey ? '
+        $content->footer = $apikey ? '
             <div id="control_bar">
                 <div id="input_bar">
                     <textarea id="openai_input" placeholder="' . get_string('askaquestion', 'mod_openaichat') . '" type="text" name="message" rows="4" cols="50"" /></textarea>

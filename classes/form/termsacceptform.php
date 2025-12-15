@@ -22,11 +22,9 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-defined('MOODLE_INTERNAL') || die();
+namespace mod_openaichat\form;
 
 require_once($CFG->libdir . '/formslib.php');
-
-namespace mod_openaichat\form;
 
 /**
  * Terms of use acceptance form

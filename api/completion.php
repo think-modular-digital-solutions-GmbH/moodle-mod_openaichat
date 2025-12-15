@@ -86,7 +86,7 @@ if (get_config('mod_openaichat', 'allowinstancesettings') === "1") {
     $model = $instance->model;
 }
 if (!$model) {
-    $model = get_config('mod_openaichat', 'defaultmodel');
+    $model = get_config('mod_openaichat', 'model');
 }
 
 

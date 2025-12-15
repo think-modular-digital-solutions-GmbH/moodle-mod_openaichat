@@ -198,7 +198,6 @@ $settings->add(new \admin_setting_heading(
 
 // AI Model.
 $models = openaichat::get_ai_models();
-$models = array_combine(array_keys($models), array_keys($models));
 $settings->add(new \admin_setting_configselect(
     'mod_openaichat/model',
     get_string('model', 'mod_openaichat'),

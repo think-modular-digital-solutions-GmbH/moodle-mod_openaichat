@@ -20,7 +20,6 @@ export const init = (data) => {
                 data: {"apikey" : apikey},
                 dataType: "text",
                 success: function(result){
-                    //here do what I want
                     $("#id_assistant").empty();
                     let object = JSON.parse(result)
                     if($.isEmptyObject(object['error'])) {

@@ -24,7 +24,6 @@
 
 require(__DIR__ . '/../../config.php');
 require_once(__DIR__ . '/lib.php');
-require_once(__DIR__ . '/mod_openaichat.php');
 
 use context_module;
 use mod_openaichat\openaichat;
@@ -62,6 +61,9 @@ $event = \mod_openaichat\event\course_module_viewed::create([
 $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('openaichat', $moduleinstance);
 $event->trigger();
+
+// Check user consent.
+openaichat::termsofuse();
 
 // Output the page.
 echo $OUTPUT->header();

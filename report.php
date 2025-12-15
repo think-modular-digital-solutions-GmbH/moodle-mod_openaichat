@@ -41,10 +41,8 @@ if ($cmid) {
 }
 
 // Check permissions.
-if (!is_siteadmin() && $context) {
-    if (!has_capability('mod/openaichat:seeopenailog', $context)) {
-        exit;
-    }
+if (!has_capability('mod/openaichat:seeopenailog', $context)) {
+    exit;
 }
 
 // Set up page.
