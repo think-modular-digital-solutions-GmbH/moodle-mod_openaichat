@@ -62,10 +62,15 @@ $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('openaichat', $moduleinstance);
 $event->trigger();
 
-// Check user consent.
-openaichat::termsofuse();
+// Handle terms submission (may redirect)
+openaichat::handle_terms_acceptance_submission();
 
-// Output the page.
+// Output starts here.
 echo $OUTPUT->header();
-echo openaichat::render();
+if (openaichat::requires_terms_acceptance()) {
+    echo openaichat::render_terms_form();
+} else {
+    echo openaichat::render();
+}
 echo $OUTPUT->footer();
+

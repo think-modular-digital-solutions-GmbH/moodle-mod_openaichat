@@ -83,45 +83,81 @@ o4-mini";
     }
 
     /**
-     * Redirec to to terms of use if not accepted yet.
+     * Handle the submission of the terms acceptance form.
      */
-    public static function termsofuse() {
+    public static function handle_terms_acceptance_submission(): void {
         global $PAGE, $USER, $DB;
 
-        $modid = $PAGE->cm->instance;
-        $userid = $USER->id;
+        $form = new termsacceptform();
 
-        $rowtermsaccepted = $DB->get_record('openaichat_usertermsofuse', ['modid' => $modid, 'userid' => $userid]);
-        if ($rowtermsaccepted == false || $rowtermsaccepted->termsofuseaccepted == 0) {
-            $form = new termsacceptform();
-            if ($form->is_submitted()) {
-                $data = $form->get_data();
-                $termsacceptedtime = time();
-                $termsaccepted = isset($data->termsaccept) ? 1 : 0;
-                $redirecturl = isset($data->termsaccept)
-                        ? new moodle_url('/mod/openaichat/view.php', ['id' => $PAGE->cm->id])
-                        : new moodle_url('/course/view.php', ['id' => $PAGE->course->id]);
+        if (!$form->is_submitted() || !$form->is_validated()) {
+            return;
+        }
 
-                if ($rowtermsaccepted) {
-                    $DB->update_record('openaichat_usertermsofuse', [
-                        'id' => $rowtermsaccepted->id,
-                        'termsofuseaccepted' => $termsaccepted,
-                        'termsofuseacceptedtime' => $termsacceptedtime,
-                    ]);
-                    redirect($redirecturl);
-                } else {
-                    $DB->insert_record('openaichat_usertermsofuse', [
-                        'modid' => $modid,
-                        'userid' => $userid,
-                        'termsofuseaccepted' => $termsaccepted,
-                        'termsofuseacceptedtime' => $termsacceptedtime,
-                    ]);
-                    redirect($redirecturl);
-                }
-            }
-            return $form->render();
+        $data = $form->get_data();
+        $accepted = !empty($data->termsaccept);
+
+        $record = [
+            'modid' => $PAGE->cm->instance,
+            'userid' => $USER->id,
+            'termsofuseaccepted' => $accepted ? 1 : 0,
+            'termsofuseacceptedtime' => time(),
+        ];
+
+        if ($existing = $DB->get_record(
+            'openaichat_usertermsofuse',
+            ['modid' => $record['modid'], 'userid' => $record['userid']]
+        )) {
+            $record['id'] = $existing->id;
+            $DB->update_record('openaichat_usertermsofuse', $record);
+        } else {
+            $DB->insert_record('openaichat_usertermsofuse', $record);
+        }
+
+        // Redirect based on decision.
+        if ($accepted) {
+            // PRG: back to the activity, now allowed
+            redirect(new moodle_url('/mod/openaichat/view.php', [
+                'id' => $PAGE->cm->id
+            ]));
+        } else {
+            // User explicitly declined → leave the activity
+            redirect(new moodle_url('/course/view.php', [
+                'id' => $PAGE->course->id
+            ]));
         }
     }
+
+
+    /**
+     * Render the terms acceptance form.
+     */
+    public static function render_terms_form(): string {
+        $form = new termsacceptform();
+        return $form->render();
+    }
+
+
+    /**
+     * Check if the user needs to accept the terms of use.
+     */
+    public static function requires_terms_acceptance(): bool {
+        global $PAGE, $USER, $DB;
+
+        $record = $DB->get_record(
+            'openaichat_usertermsofuse',
+            [
+                'modid' => $PAGE->cm->instance,
+                'userid' => $USER->id,
+            ],
+            'termsofuseaccepted',
+            IGNORE_MISSING
+        );
+
+        return empty($record) || empty($record->termsofuseaccepted);
+    }
+
+
 
     /**
      * Render the OpenAI chat module content.

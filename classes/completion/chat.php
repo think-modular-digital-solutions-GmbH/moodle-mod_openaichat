@@ -42,6 +42,7 @@ class chat extends \mod_openaichat\completion {
     /**
      * Given everything we know after constructing the parent,
      * create a completion by constructing the prompt and making the api call
+     * @param string $context: The context to format the source of truth with
      * @return JSON: The API response from OpenAI
      */
     public function create_completion($context) {
@@ -75,6 +76,7 @@ class chat extends \mod_openaichat\completion {
 
     /**
      * Make the actual API call to OpenAI
+     * @param array $history The formatted history to send to OpenAI
      * @return JSON: The response from OpenAI
      */
     private function make_api_call($history) {

@@ -117,7 +117,6 @@ class assistant extends \mod_openaichat\completion {
      * @return JSON: The response from OpenAI
      */
     private function run() {
-
         $curlbody = [
             "assistant_id" => $this->assistant,
         ];
