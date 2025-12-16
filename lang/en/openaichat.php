@@ -62,6 +62,7 @@ $string['modulename'] = 'Open AI Chat';
 $string['modulenameplural'] = 'Open AI Chats';
 $string['noassistants'] = 'You have not created any assistants yet. You need to create one <a target="_blank" href="https://platform.openai.com/assistants">in your OpenAI account</a> before you can select it here.';
 $string['noopenaichatinstances'] = 'There are no Open AI Chat instances in this course.';
+$string['noquestionsleft'] = 'You have no more questions left in this activity.';
 $string['openaichat:addinstance'] = 'Add an Open AI Chat activity';
 $string['openaichat:seeopenailog'] = 'See the Open AI report log';
 $string['openaichat:view'] = 'View Open AI Chat activity';

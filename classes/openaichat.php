@@ -240,26 +240,6 @@ o4-mini";
     }
 
     /**
-     * Check if user has questions left based on question limit.
-     *
-     * @param int $modid The module instance ID.
-     * @param int $userid The user ID.
-     * @return bool True if user has questions left, false otherwise.
-     */
-    public static function user_has_questions_left($modid, $userid) {
-        global $DB;
-
-        $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
-        if ($instance->questionlimit == 0) {
-            return true;
-        }
-
-        $counter = $DB->get_record('openaichat_userlog', ['modid' => $modid, 'userid' => $userid])->questioncounter;
-
-        return ($counter < $instance->questionlimit);
-    }
-
-    /**
      * Get the content for the OpenAI chat module.
      */
     private static function get_content() {

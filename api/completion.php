@@ -39,15 +39,15 @@ if (get_config('mod_openaichat', 'restrictusage') !== "0") {
 }
 
 // Only allow POST requests.
-// if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-//     header("Location: $CFG->wwwroot");
-//     die();
-// }
+if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
+    header("Location: $CFG->wwwroot");
+    die();
+}
 
+$modid = clean_param($body['modId'], PARAM_INT, true);
 $body = json_decode(file_get_contents('php://input'), true);
 $message = clean_param($body['message'], PARAM_NOTAGS);
 $history = clean_param_array($body['history'], PARAM_NOTAGS, true);
-$modid = clean_param($body['modId'], PARAM_INT, true);
 $threadid = clean_param($body['threadId'], PARAM_NOTAGS, true);
 $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
 

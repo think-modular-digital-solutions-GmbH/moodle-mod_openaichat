@@ -46,16 +46,24 @@ class chat extends \mod_openaichat\completion {
      * @return JSON: The API response from OpenAI
      */
     public function create_completion($context) {
+
+        // Check if user has questions left.
+        if (!$this->user_has_questions_left()) {
+            return [
+                "id" => null,
+                "message" => get_string('noquestionsleft', 'mod_openaichat'),
+            ];
+        }
+
+        // Get response from OpenAI.
         if ($this->sourceoftruth) {
             $this->sourceoftruth = format_string($this->sourceoftruth, true, ['context' => $context]);
             $this->prompt .= get_string('sourceoftruthreinforcement', 'mod_openaichat');
         }
         $this->prompt .= "\n\n";
-
         $historyjson = $this->format_history();
         array_unshift($historyjson, ["role" => "system", "content" => $this->prompt]);
         array_unshift($historyjson, ["role" => "system", "content" => $this->sourceoftruth]);
-
         array_push($historyjson, ["role" => "user", "content" => $this->message]);
 
         return $this->make_api_call($historyjson);

@@ -140,4 +140,23 @@ class completion {
         }
         return $setting;
     }
+
+    /**
+     * Check if user has questions left based on question limit.
+     *
+     * @param int $modid The module instance ID.
+     * @param int $userid The user ID.
+     * @return bool True if user has questions left, false otherwise.
+     */
+    public function user_has_questions_left() {
+        global $DB, $USER;
+
+        $questionlimit = $this->get_setting('questionlimit', 0);
+        if ($questionlimit == 0) {
+            return true;
+        }
+        $counter = $DB->get_record('openaichat_userlog', ['modid' => $this->modid, 'userid' => $USER->id])->questioncounter;
+
+        return ($counter < $questionlimit);
+    }
 }
