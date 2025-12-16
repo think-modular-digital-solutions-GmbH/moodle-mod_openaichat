@@ -54,12 +54,13 @@ o4-mini";
      * Make the API call to OpenAI.
      *
      * @param string $url The API endpoint URL.
-     * @param string $apikey The API key for authentication.
+     * @param string $modid The module instance ID to get specific API key.
      * @param array|null $data The data to send in the request body (for POST requests).
      * @param array $additionalheaders Additional headers to include in the request.
      * @return object The decoded JSON response from the API.
      */
-    public static function api_call($url, $apikey, $data = null, $additionalheaders = []) {
+    public static function api_call($url, $modid, $data = null, $additionalheaders = []) {
+        $apikey = self::get_api_key($modid);
         $headers = [
             'Content-Type: application/json',
             'Authorization: Bearer ' . $apikey,
@@ -151,9 +152,8 @@ o4-mini";
     public static function fetch_assistants($modid = null) {
         // API endpoint to fetch assistants.
         $url = 'https://api.openai.com/v1/assistants?order=desc';
-        $apikey = self::get_api_key($modid);
         $additionalheaders = ['OpenAI-Beta: assistants=v2'];
-        $response = self::api_call($url, $apikey, null, $additionalheaders);
+        $response = self::api_call($url, $modid, null, $additionalheaders);
 
         // Check for errors in the response.
         if (isset($response->error)) {

@@ -234,65 +234,18 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setType('model', PARAM_TEXT);
             $mform->hideIf('model', 'type', 'neq', 'chat');
 
-            // Temperature.
+            // Advanced JSON settings.
             $mform->addElement(
-                'text',
-                'temperature',
-                get_string('temperature', 'mod_openaichat'),
-                ['size' => '6']
+                'textarea',
+                'advanced',
+                get_string('advancedsettings', 'mod_openaichat'),
+                'wrap="virtual" rows="10" cols="80"'
             );
-            $mform->setDefault('temperature', get_config('mod_openaichat', 'temperature'));
-            $mform->addHelpButton('temperature', 'temperature', 'mod_openaichat');
-            $mform->setType('temperature', PARAM_FLOAT);
-            $mform->hideIf('temperature', 'type', 'neq', 'chat');
+            $mform->setDefault('advanced', get_config('mod_openaichat', 'advanced'));
+            $mform->addHelpButton('advanced', 'advancedsettings', 'mod_openaichat');
+            $mform->setType('advanced', PARAM_TEXT);
+            $mform->hideIf('advanced', 'type', 'neq', 'chat');
 
-            // Max tokens.
-            $mform->addElement(
-                'text',
-                'maxlength',
-                get_string('maxlength', 'mod_openaichat'),
-                ['size' => '6']
-            );
-            $mform->setDefault('maxlength', get_config('mod_openaichat', 'maxlength'));
-            $mform->addHelpButton('maxlength', 'maxlength', 'mod_openaichat');
-            $mform->setType('maxlength', PARAM_INT);
-            $mform->hideIf('maxlength', 'type', 'neq', 'chat');
-
-            // Top-p.
-            $mform->addElement(
-                'text',
-                'topp',
-                get_string('topp', 'mod_openaichat'),
-                ['size' => '6']
-            );
-            $mform->setDefault('topp', get_config('mod_openaichat', 'topp'));
-            $mform->addHelpButton('topp', 'topp', 'mod_openaichat');
-            $mform->setType('topp', PARAM_FLOAT);
-            $mform->hideIf('topp', 'type', 'neq', 'chat');
-
-            // Frequency penalty.
-            $mform->addElement(
-                'text',
-                'frequency',
-                get_string('frequency', 'mod_openaichat'),
-                ['size' => '6']
-            );
-            $mform->setDefault('frequency', get_config('mod_openaichat', 'frequency'));
-            $mform->addHelpButton('frequency', 'frequency', 'mod_openaichat');
-            $mform->setType('frequency', PARAM_FLOAT);
-            $mform->hideIf('frequency', 'type', 'neq', 'chat');
-
-            // Presence penalty.
-            $mform->addElement(
-                'text',
-                'presence',
-                get_string('presence', 'mod_openaichat'),
-                ['size' => '6']
-            );
-            $mform->setDefault('presence', get_config('mod_openaichat', 'presence'));
-            $mform->addHelpButton('presence', 'presence', 'mod_openaichat');
-            $mform->setType('presence', PARAM_FLOAT);
-            $mform->hideIf('presence', 'type', 'neq', 'chat');
         } else {
             // Instance-level settings disabled message.
             $mform->addElement(

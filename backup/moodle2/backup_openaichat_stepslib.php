@@ -58,11 +58,7 @@ class backup_openaichat_activity_structure_step extends backup_activity_structur
                 'prompt',
                 'sourceoftruth',
                 'model',
-                'temperature',
-                'maxlength',
-                'topp',
-                'frequency',
-                'presence',
+                'advanced',
                 'questionlimit',
             ]
         );

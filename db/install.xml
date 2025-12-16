@@ -23,11 +23,7 @@
         <FIELD NAME="prompt" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="sourceoftruth" TYPE="text" NOTNULL="false" SEQUENCE="false"/>
         <FIELD NAME="model" TYPE="char" LENGTH="100" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="temperature" TYPE="number" LENGTH="11" NOTNULL="false" SEQUENCE="false" DECIMALS="3"/>
-        <FIELD NAME="maxlength" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
-        <FIELD NAME="topp" TYPE="number" LENGTH="11" NOTNULL="false" SEQUENCE="false" DECIMALS="3"/>
-        <FIELD NAME="frequency" TYPE="number" LENGTH="11" NOTNULL="false" SEQUENCE="false" DECIMALS="3"/>
-        <FIELD NAME="presence" TYPE="number" LENGTH="11" NOTNULL="false" SEQUENCE="false" DECIMALS="3"/>
+        <FIELD NAME="advanced" TYPE="text" NOTNULL="true" SEQUENCE="false"/>
         <FIELD NAME="questionlimit" TYPE="int" LENGTH="5" NOTNULL="false" SEQUENCE="false"/>
       </FIELDS>
       <KEYS>

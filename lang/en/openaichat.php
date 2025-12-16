@@ -25,7 +25,11 @@
 defined('MOODLE_INTERNAL') || die();
 
 $string['advanced'] = 'Advanced settings';
-$string['advanced_help'] = 'Advanced arguments sent to OpenAI. Do not touch unless you know what you\'re doing!';
+$string['advanced_default'] = 'temperature: 0.5
+max_completion_tokens: 500
+top_p: 1
+';
+$string['advanced_help'] = 'Advanced arguments sent to OpenAI. One setting per line. Be aware that some setttings are only supported by some models';
 $string['allowinstancesettings'] = 'Instance-level settings';
 $string['allowinstancesettings_help'] = 'This setting will allow teachers, or anyone with the capability to add an activity in a context, to adjust settings at a per-activity level. Enabling this could incur additional charges by allowing non-admins to choose higher-cost models or other settings.';
 $string['apikey'] = 'OpenAI API Key';
@@ -47,15 +51,12 @@ $string['defaultassistantname'] = 'Assistant';
 $string['defaultprompt'] = "Below is a conversation between a user and a support assistant for a Moodle site, where users go for online learning:";
 $string['defaultusername'] = 'User';
 $string['disclaimer'] = 'Attention! In this chat you communicate with ChatGPT. All information you enter here is sent to OpenAI and all information you receive in the chat comes from OpenAI-ChatGPT. You can find OpenAI\'s terms of use <a href="https://openai.com/policies/terms-of-use" class="alert-link">here</a>. The OpenAI-ChatGPT AI-Bot can make mistakes. Please check important information yourself.';
+$string['erroroccured'] = 'An error occurred. Please try again later.';
 $string['event:modviewed'] = 'Open AI Chat viewed';
-$string['frequency'] = 'Frequency penalty';
-$string['frequency_help'] = 'How much to penalize new tokens based on their existing frequency in the text so far. Decreases the model\'s likelihood to repeat the same line verbatim.';
 $string['instancelevelsettingsdisabled'] = 'Instance-level settings are disabled by the administrator. Your instance will use the site default settings.';
-$string['maxlength'] = 'Maximum length';
-$string['maxlength_help'] = 'The maximum number of token to generate. Requests can use up to 2,048 or 4,000 tokens shared between prompt and completion. The exact limit varies by model. (One token is roughly 4 characters for normal English text)';
 $string['model'] = 'Model';
 $string['model_help'] = 'The model which will generate the completion. Some models are suitable for natural language tasks, others specialize in code.';
-$string['models'] = 'Available models.';
+$string['models'] = 'Available models';
 $string['models_desc'] = 'A list of available AI models that can be used in the Open AI Chat activity. Format: one model per line. eg: "gpt-5.2"';
 $string['modulename'] = 'Open AI Chat';
 $string['modulenameplural'] = 'Open AI Chats';
@@ -70,8 +71,6 @@ $string['persistconvo'] = 'Persist conversations';
 $string['persistconvo_help'] = 'If this box is checked, the assistant will remember the conversation between page loads. However, separate activity instances will maintain separate conversations. For example, a user\'s conversation will be retained between page loads within the same course, but chatting with an assistant in a different course will not carry on the same conversation.';
 $string['pluginadministration'] = 'Open AI Administration';
 $string['pluginname'] = 'Open AI Chat';
-$string['presence'] = 'Presence penalty';
-$string['presence_help'] = 'How much to penalize new tokens based on whether they appear in the text so far. Increases the model\'s likelihood to talk about new topics.';
 $string['prompt'] = 'Completion prompt';
 $string['prompt_help'] = 'The prompt the AI will be given before the conversation transcript';
 $string['questionlimit'] = 'Question Limit';
@@ -87,13 +86,9 @@ $string['table:sessionid'] = "Session ID";
 $string['table:activity'] = "Activity";
 $string['table:questions'] = "Questions";
 $string['table:answers'] = "Answers";
-$string['temperature'] = 'Temperature';
-$string['temperature_help'] = 'Controls randomness: Lowering results in less random completions. As the temperature approaches zero, the model will become deterministic and repetitive.';
 $string['termsaccept'] = 'Accept';
 $string['termsdecline'] = 'Decline';
 $string['termsofuse'] = 'Please read the <a href="https://openai.com/policies/terms-of-use" target="_blank">OpenAI Terms of Use</a> carefully before using this activity. By clicking "Accept", you agree to comply with and be bound by these terms. If you do not agree to these terms, click "Decline" and you will not be able to use this activity.';
-$string['topp'] = 'Top P';
-$string['topp_help'] = 'Controls diversity via nucleus sampling: 0.5 means half of all likelihood-weighted options are considered.';
 $string['type'] = 'API Type';
 $string['type_help'] = 'The API type that the plugin should use.';
 $string['username'] = 'User name';

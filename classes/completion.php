@@ -57,20 +57,8 @@ class completion {
     /** @var string The name of the model we're using */
     protected $model;
 
-    /** @var float The temperature setting */
-    protected $temperature;
-
-    /** @var int The maximum length of the response */
-    protected $maxlength;
-
-    /** @var float The top-p setting */
-    protected $topp;
-
-    /** @var float The frequency penalty setting */
-    protected $frequency;
-
-    /** @var float The presence penalty setting */
-    protected $presence;
+    /** @var array Additional settings */
+    protected $additionalsettings = [];
 
     /** @var string The assistant description */
     protected $assistant;
@@ -90,7 +78,7 @@ class completion {
         global $DB;
 
         $this->modid = $modsettings['modid'];
-        $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
+        $instance = $DB->get_record('openaichat', ['id' => $this->modid], '*', MUST_EXIST);
 
         // Set default values.
         $this->model = $model;
@@ -104,12 +92,22 @@ class completion {
         $this->assistantname = $this->get_setting('assistantname', get_string('defaultassistantname', 'mod_openaichat'));
         $this->username = $this->get_setting('username', get_string('defaultusername', 'mod_openaichat'));
 
-        $this->temperature = $this->get_setting('temperature', 0.5);
-        $this->maxlength = $this->get_setting('maxlength', 500);
-        $this->topp = $this->get_setting('topp', 1);
-        $this->frequency = $this->get_setting('frequency', 1);
-        $this->presence = $this->get_setting('presence', 1);
-
+        $additionalsettings = $this->get_setting('advanced', []);
+        foreach (explode("\n", $additionalsettings) as $line) {
+            $parts = explode(':', $line, 2);
+            if (count($parts) === 2) {
+                $name = trim($parts[0]);
+                $value = trim($parts[1]);
+                if (is_numeric($value)) {
+                    if (strpos($value, '.') !== false) {
+                        $value = (float) $value;
+                    } else {
+                        $value = (int) $value;
+                    }
+                }
+                $this->additionalsettings[$name] = $value;
+            }
+        }
         $this->assistant = $this->get_setting('assistant');
 
         // Then override with block settings if applicable
@@ -133,8 +131,13 @@ class completion {
      * @return mixed: The saved or default value
      */
     protected function get_setting($settingname, $default = null) {
+        global $DB;
         $instance = $DB->get_record('openaichat', ['id' => $this->modid], '*', MUST_EXIST);
-        $setting = get_mod_config($this->modid, $settingname);
+        if (get_config('mod_openaichat', 'allowinstancesettings') === "1" && isset($instance->$settingname) && $instance->$settingname !== null && $instance->$settingname !== '') {
+            $setting = $instance->$settingname;
+        } else {
+            $setting = get_config('mod_openaichat', $settingname);
+        }
         return $setting;
     }
 }

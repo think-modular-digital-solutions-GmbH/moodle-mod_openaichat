@@ -24,6 +24,8 @@
 
 namespace mod_openaichat\completion;
 
+use mod_openaichat\openaichat;
+
 /**
  * Class providing completions for chat models (3.5 and up)
  *
@@ -76,39 +78,27 @@ class chat extends \mod_openaichat\completion {
      * @return JSON: The response from OpenAI
      */
     private function make_api_call($history) {
-        $curlbody = [
+        $data = [
             "model" => $this->model,
             "messages" => $history,
-            "temperature" => (float) $this->temperature,
-            "max_tokens" => (int) $this->maxlength,
-            "top_p" => (float) $this->topp,
-            "frequency_penalty" => (float) $this->frequency,
-            "presence_penalty" => (float) $this->presence,
-            "stop" => $this->username . ":",
         ];
 
-        if (str_starts_with($this->model, "o")) {
-            $curlbody = [
-                "model" => $this->model,
-                "messages" => $history,
-                "max_completion_tokens" => (int) $this->maxlength,
-            ];
+        $data = array_merge($data, $this->additionalsettings);
+
+        $url = 'https://api.openai.com/v1/chat/completions';
+        $response = openaichat::api_call($url, $this->modid, $data, $additionalheaders = []);
+
+        // Evaluate response and return.
+        if (isset($response->error)) {
+            $message = get_string('erroroccured', 'mod_openaichat');
+            $message .= '<br><br>' . $response->error->message;
+        } else {
+            $message = $response->choices[0]->message->content;
         }
-
-        $curl = new \curl();
-        $curl->setopt([
-            'CURLOPT_HTTPHEADER' => [
-                'Authorization: Bearer ' . $this->apikey,
-                'Content-Type: application/json',
-            ],
-        ]);
-
-        $response = $curl->post("https://api.openai.com/v1/chat/completions", json_encode($curlbody));
-        $response = json_decode($response);
 
         return [
             "id" => $response->id,
-            "message" => $response->choices[0]->message->content,
+            "message" => json_encode($message),
         ];
     }
 }

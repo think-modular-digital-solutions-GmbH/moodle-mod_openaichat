@@ -93,5 +93,27 @@ function xmldb_openaichat_upgrade($oldversion) {
         upgrade_mod_savepoint(true, 2025121201, 'openaichat');
     }
 
+    if ($oldversion < 2025121601) {
+        $table = new xmldb_table('openaichat');
+
+        // Define field advanced to be added to openaichat.
+        $field = new xmldb_field('advanced', XMLDB_TYPE_TEXT, null, null, null, null, null, 'model');
+        if (!$dbman->field_exists($table, $field)) {
+            $dbman->add_field($table, $field);
+        }
+
+        // Remove obsolete fields.
+        $obsoletefields = ['temperature', 'maxlength', 'topp', 'frequency', 'presence'];
+        foreach ($obsoletefields as $obsoletefieldname) {
+            $obsoletefield = new xmldb_field($obsoletefieldname, XMLDB_TYPE_NUMBER, '11', null, null, null, null, 'model');
+            if ($dbman->field_exists($table, $obsoletefield)) {
+                $dbman->drop_field($table, $obsoletefield);
+            }
+        }
+
+        // Openaichat savepoint reached.
+        upgrade_mod_savepoint(true, 2025121601, 'openaichat');
+    }
+
     return true;
 }

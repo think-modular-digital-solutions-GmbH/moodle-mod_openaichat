@@ -22,6 +22,8 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
+define('AJAX_SCRIPT', true);
+
 require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
 require_once($CFG->dirroot . '/mod/openaichat/lib.php');
@@ -42,7 +44,11 @@ $userid = required_param('userId', PARAM_TEXT);
 $instance = $DB->get_record('openaichat', ['id' => $modid], '*', MUST_EXIST);
 $questionlimit = $instance->questionlimit;
 
-$counter = $DB->get_record('openaichat_userlog', ['modid' => $modid, 'userid' => $USER->id])->questioncounter;
+$record = $DB->get_record('openaichat_userlog', [
+    'modid'  => $modid,
+    'userid' => $USER->id,
+]);
+$counter = $record ? $record->questioncounter : 0;
 
 if ($questionlimit == 0) {
     echo "-1";

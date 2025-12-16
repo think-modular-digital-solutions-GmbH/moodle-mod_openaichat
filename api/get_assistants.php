@@ -22,7 +22,7 @@
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
 
-namespace mod_openaichat;
+define('AJAX_SCRIPT', true);
 
 require_once('../../../config.php');
 require_once($CFG->libdir . '/filelib.php');
