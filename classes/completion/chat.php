@@ -82,7 +82,6 @@ class chat extends \mod_openaichat\completion {
             "model" => $this->model,
             "messages" => $history,
         ];
-
         $data = array_merge($data, $this->additionalsettings);
 
         $url = 'https://api.openai.com/v1/chat/completions';
@@ -98,7 +97,7 @@ class chat extends \mod_openaichat\completion {
 
         return [
             "id" => $response->id,
-            "message" => json_encode($message),
+            "message" => $message,
         ];
     }
 }

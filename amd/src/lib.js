@@ -143,9 +143,10 @@ define(['jquery', 'core/str'], ($, Str) => {
         toggleControls(true);
         addToChatLog('bot loading', '...');
 
+        let sesskey = M.cfg.sesskey;
+
         fetch(`${M.cfg.wwwroot}/mod/openaichat/api/completion.php`, {
             method: 'POST',
-            sesskey: M.cfg.sesskey,
             body: JSON.stringify({sesskey, message, history, modId, threadId })
         })
         .then(r => {

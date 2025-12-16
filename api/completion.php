@@ -45,7 +45,6 @@ if (get_config('mod_openaichat', 'restrictusage') !== "0") {
 // }
 
 $body = json_decode(file_get_contents('php://input'), true);
-$body = ['message' => '', 'history' => [], 'modId' => 1, 'threadId' => ''];
 $message = clean_param($body['message'], PARAM_NOTAGS);
 $history = clean_param_array($body['history'], PARAM_NOTAGS, true);
 $modid = clean_param($body['modId'], PARAM_INT, true);

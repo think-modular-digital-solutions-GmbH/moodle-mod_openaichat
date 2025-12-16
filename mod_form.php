@@ -238,11 +238,11 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->addElement(
                 'textarea',
                 'advanced',
-                get_string('advancedsettings', 'mod_openaichat'),
+                get_string('advanced', 'mod_openaichat'),
                 'wrap="virtual" rows="10" cols="80"'
             );
             $mform->setDefault('advanced', get_config('mod_openaichat', 'advanced'));
-            $mform->addHelpButton('advanced', 'advancedsettings', 'mod_openaichat');
+            $mform->addHelpButton('advanced', 'advanced', 'mod_openaichat');
             $mform->setType('advanced', PARAM_TEXT);
             $mform->hideIf('advanced', 'type', 'neq', 'chat');
 
