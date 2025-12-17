@@ -90,7 +90,6 @@ class mod_openaichat_mod_form extends moodleform_mod {
         }
 
         if (get_config('mod_openaichat', 'allowinstancesettings') == 1) {
-
             // API Key.
             $mform->addElement(
                 'password',
@@ -149,13 +148,6 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->addHelpButton('username', 'username', 'mod_openaichat');
             $mform->setType('username', PARAM_TEXT);
 
-            // API settings fieldset.
-            $mform->addElement(
-                'header',
-                'apisettingsheading',
-                get_string('apisettings', 'mod_openaichat')
-            );
-
             // Assistant selection.
             if (count($assistantarray)) {
                 $mform->addElement(
@@ -187,7 +179,10 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->setDefault('persistconvo', get_config('mod_openaichat', 'persistconvo'));
             $mform->addHelpButton('persistconvo', 'persistconvo', 'mod_openaichat');
             $mform->setType('persistconvo', PARAM_INT);
-            $mform->hideIf('persistconvo', 'type', 'neq', 'assistant');
+            // Not working at the moment - conversation persistence.
+            // Will fix later, or remove if switching to response API.
+            // Assistant API is outdated anyways.
+            $mform->hideIf('persistconvo', 'type', 'neq', 'alwayshidden');
 
             // Prompt.
             $mform->addElement(
@@ -245,7 +240,6 @@ class mod_openaichat_mod_form extends moodleform_mod {
             $mform->addHelpButton('advanced', 'advanced', 'mod_openaichat');
             $mform->setType('advanced', PARAM_TEXT);
             $mform->hideIf('advanced', 'type', 'neq', 'chat');
-
         } else {
             // Instance-level settings disabled message.
             $mform->addElement(

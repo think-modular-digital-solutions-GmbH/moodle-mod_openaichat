@@ -35,7 +35,9 @@ use stdClass;
  * @package    openaichat
  */
 class openaichat {
-
+    /**
+     * Default AI models.
+     */
     const DEFAULT_MODELS = "gpt-5.2
 gpt-5.1
 gpt-5
@@ -104,10 +106,8 @@ o4-mini";
             'termsofuseacceptedtime' => time(),
         ];
 
-        if ($existing = $DB->get_record(
-            'openaichat_usertermsofuse',
-            ['modid' => $record['modid'], 'userid' => $record['userid']]
-        )) {
+        $params = ['modid' => $record['modid'], 'userid' => $record['userid']];
+        if ($existing = $DB->get_record('openaichat_usertermsofuse', $params)) {
             $record['id'] = $existing->id;
             $DB->update_record('openaichat_usertermsofuse', $record);
         } else {
@@ -116,14 +116,14 @@ o4-mini";
 
         // Redirect based on decision.
         if ($accepted) {
-            // PRG: back to the activity, now allowed
+            // PRG: back to the activity, now allowed.
             redirect(new moodle_url('/mod/openaichat/view.php', [
-                'id' => $PAGE->cm->id
+                'id' => $PAGE->cm->id,
             ]));
         } else {
-            // User explicitly declined → leave the activity
+            // User explicitly declined → leave the activity.
             redirect(new moodle_url('/course/view.php', [
-                'id' => $PAGE->course->id
+                'id' => $PAGE->course->id,
             ]));
         }
     }
@@ -157,26 +157,12 @@ o4-mini";
         return empty($record) || empty($record->termsofuseaccepted);
     }
 
-
-
     /**
      * Render the OpenAI chat module content.
      */
     public static function render() {
         $c = self::get_content();
         return '<div class="mod_openaichat"><div class="alert alert-warning"><p>' . get_string('disclaimer', 'mod_openaichat') . '</p></div><p id="remaining-questions"></p>' . $c->text . $c->footer . '</div>';
-    }
-
-    /**
-     * This is for site level settings.
-     */
-    public static function get_type_to_display() {
-        $type = get_config('mod_openaichat', 'type');
-        if ($type) {
-            return $type;
-        }
-
-        return 'chat';
     }
 
     /**
@@ -193,7 +179,6 @@ o4-mini";
 
         // Check for errors in the response.
         if (isset($response->error)) {
-
             // Show error.
             if (isset($_GET['testconnection'])) {
                 $error = get_string('connection:error', 'mod_openaichat', $response->error->message);

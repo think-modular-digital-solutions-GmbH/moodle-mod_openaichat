@@ -30,14 +30,10 @@ require_once($CFG->dirroot . '/mod/openaichat/lib.php');
 
 global $PAGE, $ADMIN;
 
-// JS for conditionally showing settings.
-$PAGE->requires->js_call_amd('mod_openaichat/settings', 'init');
-
 // Get type and assistants - only if on own settings page.
-$type = 'chat';
+
 $assistants = [];
 if (array_key_exists('section', $_GET) && $_GET['section'] == 'modsettingopenaichat') {
-    $type = openaichat::get_type_to_display();
     $assistants = openaichat::fetch_assistants();
 }
 
@@ -149,61 +145,61 @@ $settings->add(new \admin_setting_configcheckbox(
 ));
 
 // Assistant settings.
-if ($type === 'assistant') {
-    // Assistant settings.
-    $settings->add(new \admin_setting_heading(
-        'mod_openaichat/assistantheading',
-        get_string('assistantheading', 'mod_openaichat'),
-        get_string('assistantheading_help', 'mod_openaichat')
-    ));
+$settings->add(new \admin_setting_heading(
+    'mod_openaichat/assistantheading',
+    get_string('assistantheading', 'mod_openaichat'),
+    get_string('assistantheading_help', 'mod_openaichat')
+));
 
-    if (count($assistants) > 0) {
-        // Assistants available.
-        $settings->add(new \admin_setting_configselect(
-            'mod_openaichat/assistant',
-            get_string('assistant', 'mod_openaichat'),
-            get_string('assistant_help', 'mod_openaichat'),
-            count($assistants) ? reset($assistants) : null,
-            $assistants,
-        ));
-    } else {
-        // No assistants available.
-        $settings->add(new \admin_setting_description(
-            'mod_openaichat/noassistants',
-            get_string('assistant', 'mod_openaichat'),
-            get_string('noassistants', 'mod_openaichat'),
-        ));
-    }
-
-    $settings->add(new \admin_setting_configcheckbox(
-        'mod_openaichat/persistconvo',
-        get_string('persistconvo', 'mod_openaichat'),
-        get_string('persistconvo_help', 'mod_openaichat'),
-        1
+if (count($assistants) > 0) {
+    // Assistants available.
+    $settings->add(new \admin_setting_configselect(
+        'mod_openaichat/assistant',
+        get_string('assistant', 'mod_openaichat'),
+        get_string('assistant_help', 'mod_openaichat'),
+        count($assistants) ? reset($assistants) : null,
+        $assistants,
     ));
 } else {
-    // Chat settings.
-    $settings->add(new \admin_setting_heading(
-        'mod_openaichat/chatheading',
-        get_string('chatheading', 'mod_openaichat'),
-        get_string('chatheading_help', 'mod_openaichat')
-    ));
-
-    // Prompt.
-    $settings->add(new \admin_setting_configtextarea(
-        'mod_openaichat/prompt',
-        get_string('prompt', 'mod_openaichat'),
-        get_string('prompt_help', 'mod_openaichat'),
-        "Below is a conversation between a user and a support assistant for a Moodle site, where users go for online learning.",
-        PARAM_TEXT
-    ));
-
-    // Source of Truth.
-    $settings->add(new \admin_setting_configtextarea(
-        'mod_openaichat/sourceoftruth',
-        get_string('sourceoftruth', 'mod_openaichat'),
-        get_string('sourceoftruth_help', 'mod_openaichat'),
-        '',
-        PARAM_TEXT
+    // No assistants available.
+    $settings->add(new \admin_setting_description(
+        'mod_openaichat/noassistants',
+        get_string('assistant', 'mod_openaichat'),
+        get_string('noassistants', 'mod_openaichat'),
     ));
 }
+
+// Not working at the moment - conversation persistence.
+// Will fix later, or remove if switching to response API.
+// Assistant API is outdated anyways.
+// $settings->add(new \admin_setting_configcheckbox(
+//     'mod_openaichat/persistconvo',
+//     get_string('persistconvo', 'mod_openaichat'),
+//     get_string('persistconvo_help', 'mod_openaichat'),
+//     1
+// ));
+
+// Chat settings.
+$settings->add(new \admin_setting_heading(
+    'mod_openaichat/chatheading',
+    get_string('chatheading', 'mod_openaichat'),
+    get_string('chatheading_help', 'mod_openaichat')
+));
+
+// Prompt.
+$settings->add(new \admin_setting_configtextarea(
+    'mod_openaichat/prompt',
+    get_string('prompt', 'mod_openaichat'),
+    get_string('prompt_help', 'mod_openaichat'),
+    "Below is a conversation between a user and a support assistant for a Moodle site, where users go for online learning.",
+    PARAM_TEXT
+));
+
+// Source of Truth.
+$settings->add(new \admin_setting_configtextarea(
+    'mod_openaichat/sourceoftruth',
+    get_string('sourceoftruth', 'mod_openaichat'),
+    get_string('sourceoftruth_help', 'mod_openaichat'),
+    '',
+    PARAM_TEXT
+));

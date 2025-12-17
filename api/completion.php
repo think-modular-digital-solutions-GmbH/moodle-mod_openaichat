@@ -44,8 +44,8 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     die();
 }
 
-$modid = clean_param($body['modId'], PARAM_INT, true);
 $body = json_decode(file_get_contents('php://input'), true);
+$modid = clean_param($body['modId'], PARAM_INT, true);
 $message = clean_param($body['message'], PARAM_NOTAGS);
 $history = clean_param_array($body['history'], PARAM_NOTAGS, true);
 $threadid = clean_param($body['threadId'], PARAM_NOTAGS, true);

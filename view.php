@@ -62,7 +62,7 @@ $event->add_record_snapshot('course', $course);
 $event->add_record_snapshot('openaichat', $moduleinstance);
 $event->trigger();
 
-// Handle terms submission (may redirect)
+// Handle terms submission (may redirect).
 openaichat::handle_terms_acceptance_submission();
 
 // Output starts here.
@@ -73,4 +73,3 @@ if (openaichat::requires_terms_acceptance()) {
     echo openaichat::render();
 }
 echo $OUTPUT->footer();
-

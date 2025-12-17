@@ -66,7 +66,7 @@ if (empty($modid)) {
 // Create table.
 $tablename = 'mod-openaichat-report';
 $table = new flexible_table($tablename);
-$table->is_downloading($download, $title. $tablename);
+$table->is_downloading($download, $title . $tablename);
 $cols = [
     'timestamp',
     'sessionid',
