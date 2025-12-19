@@ -45,6 +45,7 @@ $responsemessage = required_param('responseMessage', PARAM_TEXT);
 $sesskey = sesskey();
 
 $logdata = [
+    'timestamp' => time(),
     'modid' => $modid,
     'sesskey' => $sesskey,
     'request' => $requestmessage,

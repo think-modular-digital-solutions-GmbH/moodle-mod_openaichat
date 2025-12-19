@@ -82,7 +82,7 @@ class mod_openaichat_mod_form extends moodleform_mod {
 
         // Link to log report.
         if ($modid) {
-            $url = new moodle_url('/mod/openaichat/report.php', ['id' => $cmid, 'modid' => $modid]);
+            $url = new moodle_url('/mod/openaichat/report.php', ['cmid' => $cmid, 'modid' => $modid]);
             $mform->addElement(
                 'html',
                 html_writer::link($url, get_string('openailog', 'mod_openaichat'))

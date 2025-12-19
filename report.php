@@ -29,24 +29,29 @@ defined('MOODLE_INTERNAL') || die();
 
 require_login();
 
+use mod_openaichat\openaichat;
+
 global $COURSE, $DB;
 
 // Get parameters.
 $cmid = optional_param('cmid', null, PARAM_INT);
 $modid = optional_param('modid', null, PARAM_INT);
 if ($cmid) {
+    $cm = get_coursemodule_from_id('openaichat', $cmid, 0, false, MUST_EXIST);
+    $course = get_course($cm->course);
+    require_login($course, true, $cm);
     $context = context_module::instance($cmid);
+    $PAGE->set_cm($cm, $course);
+    $url = new moodle_url('/mod/openaichat/report.php', ['cmid' => $cmid, 'modid' => $modid]);
 } else {
     $context = context_system::instance();
+    $url = new moodle_url('/mod/openaichat/report.php');
 }
 
 // Check permissions.
-if (!has_capability('mod/openaichat:seeopenailog', $context)) {
-    exit;
-}
+require_capability('mod/openaichat:seeopenailog', $context);
 
 // Set up page.
-$url = new moodle_url('/mod/openaichat/report.php');
 $title = get_string('openailog', 'mod_openaichat');
 $PAGE->set_url($url);
 $PAGE->set_context($context);
@@ -55,13 +60,6 @@ $PAGE->set_heading($title);
 
 // Download handling.
 $download = optional_param('download', '', PARAM_ALPHA);
-
-// Get records.
-if (empty($modid)) {
-    $records = $DB->get_records('openaichat_chatlog');
-} else {
-    $records = $DB->get_records('openaichat_chatlog', ['modid' => $modid]);
-}
 
 // Create table.
 $tablename = 'mod-openaichat-report';
@@ -94,12 +92,33 @@ if (!$table->is_downloading()) {
     echo $OUTPUT->header();
 }
 
+// Get records.
+if (empty($modid)) {
+    $records = $DB->get_records_select(
+        'openaichat_chatlog',
+        '',
+        null,
+        'timestamp DESC'
+    );
+} else {
+    $records = $DB->get_records_select(
+        'openaichat_chatlog',
+        'modid = :modid',
+        ['modid' => $modid],
+        'timestamp DESC'
+    );
+}
+
 // Add records.
 foreach ($records as $record) {
+
+    // Get cmid from modid.
+    $cmid = openaichat::get_cmid_from_modid($record->modid);
+
     $activityname = $DB->get_record('openaichat', ['id' => $record->modid])->name;
     $activityurl = '<a href="' . $CFG->wwwroot . '/mod/openaichat/view.php?id=' . $cmid . '">' . $activityname . '</a>';
     $table->add_data([
-        userdate($record->timestamp),
+        $record->timestamp ? userdate($record->timestamp) : '',
         $record->sesskey,
         $activityurl,
         $record->request,

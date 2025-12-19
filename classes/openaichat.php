@@ -225,6 +225,37 @@ o4-mini";
     }
 
     /**
+     * Get course module ID from module instance ID.
+     * @param int $modid The module instance ID.
+     * @return int The course module ID.
+     * @throws \moodle_exception If the course module is not found.
+     */
+    public static function get_cmid_from_modid($modid) {
+        global $DB;
+
+        $cmid = $DB->get_field_sql(
+            "
+            SELECT cm.id
+            FROM {course_modules} cm
+            JOIN {modules} m ON m.id = cm.module
+            JOIN {openaichat} o ON o.id = cm.instance
+            WHERE m.name = :modname
+            AND o.id = :modid
+            ",
+            [
+                'modname' => 'openaichat',
+                'modid'   => $modid,
+            ]
+        );
+
+        if (!$cmid) {
+            throw new moodle_exception('invalidcoursemodule');
+        }
+
+        return $cmid;
+    }
+
+    /**
      * Get the content for the OpenAI chat module.
      */
     private static function get_content() {
